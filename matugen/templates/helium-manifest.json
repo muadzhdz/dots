@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Matugen Theme",
+  "version": "1.0",
+  "description": "Auto-generated theme from matugen (Material 3)",
+  "theme": {
+    "colors": {
+      "frame": [{{colors.surface.default.hex_stripped_truncated}}, {{colors.surface.default.hex_stripped_truncated}}, {{colors.surface.default.hex_stripped_truncated}}],
+      "toolbar": [{{colors.surface_dim.default.hex_stripped_truncated}}, {{colors.surface_dim.default.hex_stripped_truncated}}, {{colors.surface_dim.default.hex_stripped_truncated}}],
+      "tab_text": [{{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}],
+      "tab_background_text": [{{colors.on_surface_variant.default.hex_stripped_truncated}}, {{colors.on_surface_variant.default.hex_stripped_truncated}}, {{colors.on_surface_variant.default.hex_stripped_truncated}}],
+      "bookmark_text": [{{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}],
+      "ntp_background": [{{colors.surface.default.hex_stripped_truncated}}, {{colors.surface.default.hex_stripped_truncated}}, {{colors.surface.default.hex_stripped_truncated}}],
+      "ntp_text": [{{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}],
+      "ntp_link": [{{colors.primary.default.hex_stripped_truncated}}, {{colors.primary.default.hex_stripped_truncated}}, {{colors.primary.default.hex_stripped_truncated}}],
+      "ntp_section": [{{colors.surface_container.default.hex_stripped_truncated}}, {{colors.surface_container.default.hex_stripped_truncated}}, {{colors.surface_container.default.hex_stripped_truncated}}],
+      "omnibox_text": [{{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}],
+      "omnibox_background": [{{colors.surface_container.default.hex_stripped_truncated}}, {{colors.surface_container.default.hex_stripped_truncated}}, {{colors.surface_container.default.hex_stripped_truncated}}],
+      "tab_background_color": [{{colors.surface_dim.default.hex_stripped_truncated}}, {{colors.surface_dim.default.hex_stripped_truncated}}, {{colors.surface_dim.default.hex_stripped_truncated}}],
+      "tab_foreground_color": [{{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}, {{colors.on_surface.default.hex_stripped_truncated}}],
+      "toolbar_button_icon_color": [{{colors.on_surface_variant.default.hex_stripped_truncated}}, {{colors.on_surface_variant.default.hex_stripped_truncated}}, {{colors.on_surface_variant.default.hex_stripped_truncated}}],
+      "button_background_hover": [{{colors.primary_container.default.hex_stripped_truncated}}, {{colors.primary_container.default.hex_stripped_truncated}}, {{colors.primary_container.default.hex_stripped_truncated}}],
+      "button_background_pressed": [{{colors.primary.default.hex_stripped_truncated}}, {{colors.primary.default.hex_stripped_truncated}}, {{colors.primary.default.hex_stripped_truncated}}]
+    },
+    "properties": {
+      "ntp_logo_alternate": 0
+    }
+  }
+}

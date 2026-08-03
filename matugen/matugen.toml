@@ -1,0 +1,83 @@
+[config]
+prefer = "darkness"
+
+[templates.rofi]
+input_path = "templates/rofi-colors.rasi"
+output_path = "generated/rofi-colors.rasi"
+
+[templates.waybar]
+input_path = "templates/waybar.css"
+output_path = "generated/waybar.css"
+post_hook = "pkill -SIGUSR2 waybar || true"
+
+[templates.kitty]
+input_path = "templates/kitty-colors.conf"
+output_path = "generated/kitty-colors.conf"
+post_hook = "pkill -USR1 kitty 2>/dev/null || true"
+
+[templates.alacritty]
+input_path = "templates/alacritty.toml"
+output_path = "generated/alacritty.toml"
+
+[templates.ghostty]
+input_path = "templates/ghostty"
+output_path = "~/.config/ghostty/themes/matugen.conf"
+post_hook = "gdbus call --session --dest com.mitchellh.ghostty --object-path /com/mitchellh/ghostty --method org.gtk.Actions.Activate reload-config '[]' '{}' >/dev/null 2>&1 || true"
+
+[templates.mako]
+input_path = "templates/mako-colors"
+output_path = "generated/mako-colors.conf"
+post_hook = "makoctl reload 2>/dev/null || true"
+
+[templates.vscode-colors]
+input_path = "templates/vscode-colors"
+output_path = "~/.cache/matugen/vscode-colors"
+
+[templates.vscode-json]
+input_path = "templates/vscode-colors.json"
+output_path = "~/.cache/matugen/vscode-colors.json"
+
+[templates.neovim]
+input_path = "templates/neovim-theme-spec.lua"
+output_path = "generated/neovim-theme-spec.lua"
+
+[templates.chromium]
+input_path = "templates/chromium-colors.conf"
+output_path = "generated/chromium-colors.conf"
+post_hook = "bash $HOME/.config/scripts/generate-browser-themes.sh 2>/dev/null || true"
+
+[templates.firefox]
+input_path = "templates/firefox_websites.css"
+output_path = "generated/firefox_websites.css"
+
+[templates.zen]
+input_path = "templates/zen-userchrome.css"
+output_path = "~/.zen/matugen/chrome/userChrome.css"
+
+[templates.btop]
+input_path = "templates/btop.theme"
+output_path = "~/.config/btop/themes/matugen.theme"
+post_hook = "pkill -USR2 btop 2>/dev/null || true"
+
+[templates.gtk4]
+input_path = "templates/gtk4.css"
+output_path = "~/.config/gtk-4.0/gtk.css"
+
+[templates.gtk3]
+input_path = "templates/gtk3.css"
+output_path = "~/.config/gtk-3.0/gtk.css"
+post_hook = "gsettings set org.gnome.desktop.interface color-scheme prefer-dark; gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark; killall xdg-desktop-portal-gtk 2>/dev/null || true"
+
+[templates.hyprland]
+input_path = "templates/hyprland-border-colors"
+output_path = "generated/hyprland-border-colors.lua"
+post_hook = "hyprctl eval 'hl.config({general={col={active_border={colors={\"rgba({{colors.primary.default.hex_stripped}}ff)\"}}}}})' 2>/dev/null; hyprctl eval 'hl.config({general={col={inactive_border=\"rgba({{colors.surface_container_high.default.hex_stripped}}aa)\"}}})' 2>/dev/null"
+
+[templates.hyprlock]
+input_path = "templates/hyprlock-colors.conf"
+output_path = "generated/hyprlock-colors.conf"
+
+[templates.swayosd]
+input_path = "templates/swayosd.css"
+output_path = "~/.config/swayosd/style.css"
+post_hook = "systemctl --user restart swayosd-server.service 2>/dev/null || true"

@@ -1,0 +1,72 @@
+@import url("../matugen/generated/waybar.css");
+
+window#waybar {
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 0 0 20px 20px;
+}
+
+* {
+  background-color: transparent;
+  color: @on-surface;
+  border: none;
+  border-radius: 0 0 20px 20px;
+  min-height: 35px;
+  font-family: 'JetBrainsMono Nerd Font';
+  font-size: 13px;
+}
+
+.modules-left {
+  margin-left: 20px;
+}
+
+.modules-right {
+  margin-right: 20px;
+}
+
+#custom-arch {
+  padding: 0 8px;
+  margin: 0 2px;
+}
+
+#workspaces button {
+  all: initial;
+  padding: 0 6px;
+  margin: 0 1.5px;
+  min-width: 9px;
+}
+
+#workspaces button.empty {
+  opacity: 0.5;
+}
+
+#cpu,
+#battery,
+#pulseaudio {
+  min-width: 12px;
+  margin: 0 7.5px;
+}
+
+#tray {
+  margin-right: 16px;
+}
+
+#bluetooth {
+  margin-right: 17px;
+}
+
+#network {
+  margin-right: 13px;
+}
+
+#custom-expand-icon {
+  margin-right: 18px;
+}
+
+tooltip {
+  padding: 2px;
+}
+
+#clock {
+  margin-left: 8.75px;
+}
