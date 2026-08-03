@@ -1,107 +1,59 @@
-# hyprland-rice
+# dots
 
-A Hyprland dotfiles setup with full Material You theming via [matugen](https://github.com/InioX/matugen). Written in the **Lua config API** (requires Hyprland >= 0.55).
+Personal Hyprland dotfiles based on [Omarchy](https://github.com/basecamp/omarchy) & [Dusky](https://github.com/dusklinux/dusky), with full Material You theming via [matugen](https://github.com/InioX/matugen).
 
-Every themeable component (waybar, kitty, rofi, mako, swayosd, btop, cava, ghostty, GTK, borders, lockscreen, browser themes) is recolored automatically every time the wallpaper changes.
+Every component (waybar, kitty, rofi, mako, swayosd, btop, cava, ghostty, GTK, browser themes) recolors itself automatically on every wallpaper change. Config uses the **Lua API** (requires Hyprland >= 0.55).
 
 ## Components
 
-| Component | Tool |
-|---|---|
-| WM / compositor | [Hyprland](https://hyprland.org) (Lua API) |
-| Bar | [waybar](https://github.com/Alexays/Waybar) |
-| Notifications | [mako](https://github.com/emersion/mako) |
-| Launcher / menus / pickers | [rofi](https://github.com/lbonn/rofi) (wayland fork) |
-| Terminal | [kitty](https://sw.kovidgoyal.net/kitty/) + [ghostty](https://ghostty.org) |
-| Lock screen | [hyprlock](https://github.com/hyprwm/hyprlock) |
-| Color engine | [matugen](https://github.com/InioX/matugen) + `python-materialyoucolor` |
-| Wallpaper daemon | [awww](https://github.com/Baldomo/awww) + awww-daemon |
-| OSD (volume/brightness) | [swayosd](https://github.com/ErikReider/SwayOSD) |
-| Clipboard | [cliphist](https://github.com/sentriz/cliphist) + wl-clipboard |
-| Screenshots / OCR | [grim](https://github.com/emersion/grim) + [slurp](https://github.com/emersion/slurp) + [satty](https://github.com/gabm/Satty) + tesseract |
-| File manager | dolphin |
-| Color picker | hyprpicker |
-
-## Dependencies
-
-Arch Linux (adjust for your distro):
-
-```bash
-# main
-pacman -S hyprland hyprlock hyprpicker waybar mako rofi kitty dolphin \
-          xdg-desktop-portal-hyprland swayosd matugen cliphist wl-clipboard \
-          grim slurp satty tesseract jq bc libnotify playerctl pipewire wireplumber \
-          ttf-jetbrains-mono-nerd noto-fonts-emoji
-
-# AUR
-yay -S hyprshutdown python-materialyoucolor yaru-icon-theme adw-gtk3
-
-# optional / scripts
-pamixer dusky-run impala wiremix bluetui kvantum btop cava
-```
-
-### swayosd (custom build)
-
-This setup uses a **custom-built swayosd with 24px icons** (upstream ships 32px).
-If you install the standard `swayosd` package the OSD icons will look too big.
-Rebuild from the repo's `config.toml`/`style.css` or override with your own build.
+Hyprland, waybar, mako, rofi (wayland), kitty, ghostty, hyprlock, matugen, awww, swayosd, cliphist, grim/slurp/satty, dolphin.
 
 ## Install
 
 ```bash
-git clone https://github.com/muadzhdz/hyprland-rice ~/hyprland-rice
-cd ~/hyprland-rice
+git clone https://github.com/muadzhdz/dots && cd dots
 ./install.sh
 ```
 
-Then put wallpapers in `~/Pictures/Wallpapers/`, log out and back in, and run:
+Then put wallpapers in `~/Pictures/Wallpapers/`, restart Hyprland, and run:
 
 ```bash
 ~/.config/scripts/wallpaper.sh init
 ```
 
-`matugen/generated/` is committed so the setup works even before you change
-wallpapers, but running `wallpaper.sh` is what generates the colors.
+`matugen/generated/` is committed so colors work even before running matugen.
 
-> The repo ships without wallpapers. Grab your own — every theme follows the
-> current wallpaper's palette.
+> **swayosd:** this setup expects the custom **24px-icon build**. The stock package ships 32px icons — rebuild from `config.toml`/`style.css` or expect oversized icons.
 
 ## Keybinds
 
 | Key | Action |
 |---|---|
-| `SUPER + Return` | open terminal |
-| `SUPER + Space` | app launcher |
+| `SUPER + Return` | terminal |
+| `SUPER + Space` | launcher |
 | `SUPER + ALT + Space` | power menu |
 | `SUPER + E` | file manager |
 | `SUPER + Q` | close window |
-| `SUPER + F` / `SUPER + SHIFT + F` | fullscreen / maximized |
+| `SUPER + F` / `+ SHIFT + F` | fullscreen / maximized |
 | `SUPER + T` | toggle float |
-| `SUPER + W` | random wallpaper |
-| `SUPER + SHIFT + W` | wallpaper picker (rofi) |
+| `SUPER + W` / `+ SHIFT + W` | random wallpaper / picker |
 | `SUPER + V` | clipboard history |
-| `SUPER + S` | scratchpad (special workspace) |
+| `SUPER + S` | scratchpad |
 | `SUPER + L` | lock |
-| `SUPER + M` | shutdown menu |
+| `SUPER + M` | shutdown |
 | `Print` / `SUPER + SHIFT + S` | screenshot |
-| `SUPER + Print` | OCR screenshot |
+| `SUPER + Print` | OCR |
 | `SUPER + ALT + E` | emoji picker |
-| `SUPER + slash` | monitor scaling cycle |
-| `ALT + Tab` / `ALT + SHIFT + Tab` | next / previous window |
-| `CTRL + ALT + Tab` | next monitor |
-| `SUPER + arrows` | focus |
-| `SUPER + SHIFT + arrows` | swap windows |
-| `SUPER + 1-0` | switch workspace |
-| `SUPER + SHIFT + 1-0` | move window to workspace |
-| `SUPER + mouse` | drag / resize |
+| `ALT + Tab` / `SHIFT` | cycle windows |
+| `SUPER + arrows` / `+ SHIFT` | focus / swap |
+| `SUPER + 1-0` / `+ SHIFT` | workspace / move |
 
-## Notes
+## Credits
 
-- `misc.on_focus_under_fullscreen = 1` is set in `hypr/modules/misc.lua` —
-  windows you switch to become fullscreen (Windows-style Alt+Tab), instead of
-  the default where leaving fullscreen undoes it.
-- Alt+Tab, volume/brightness and media keys are defined in
-  `hypr/modules/binds.lua`; tweak to taste.
-- Browser theming (`scripts/generate-browser-themes.sh`) targets chromium,
-  Firefox and Zen profiles; run it or let the matugen `chromium` post_hook
-  handle it.
+- [Omarchy](https://github.com/basecamp/omarchy) by DHH (MIT)
+- [Dusky](https://github.com/dusklinux/dusky) by dusklinux (MIT)
+- [MatugenFox](https://github.com/Ubaidullah-Web-Dev/MatugenFox) — browser theming
+
+## License
+
+[MIT](LICENSE)
