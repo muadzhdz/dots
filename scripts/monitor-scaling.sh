@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCALES=(1.0 1.25 1.6 2.0 3.0 4.0)
+SCALES=(1.0 1.25 1.5 2.0)
 
 monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name')
 scale=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .scale')

@@ -1,7 +1,7 @@
-@define-color background-color #131318;
-@define-color label #e4e1e9;
-@define-color progress #bcc2ff;
-@define-color border-color #91909a;
+@define-color background-color #101510;
+@define-color label #dfe4dc;
+@define-color progress #96d5a7;
+@define-color border-color #8b938a;
 
 window#osd {
   border-radius: 10px;
@@ -16,6 +16,10 @@ window#osd #container {
 window#osd image,
 window#osd label {
   color: @label;
+}
+
+window#osd image {
+  -gtk-icon-size: 24px;
 }
 
 window#osd label {

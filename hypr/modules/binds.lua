@@ -4,16 +4,15 @@
 
 -- Set programs that you use
 local terminal    = "kitty"
-local fileManager = "dolphin"
-local menu        = "hyprlauncher"
-local scriptsDir     = os.getenv("HOME") .. "/.config/scripts"
-local launcher    = scriptsDir .. "/launcher.sh"
+local fileManager = "nautilus"
+local scriptsDir     = os.getenv("HOME") .. "/.config/scripts"local launcher    = scriptsDir .. "/launcher.sh"
 local powerMenu   = scriptsDir .. "/powermenu.sh"
 local emojiPicker = scriptsDir .. "/emoji.sh"
 local screenshot  = scriptsDir .. "/screenshot.sh"
 local ocr         = scriptsDir .. "/ocr.sh"
 local clipRofi    = scriptsDir .. "/clipboard_rofi.sh"
 local monitorScaling = scriptsDir .. "/monitor-scaling.sh"
+local displayMenu    = scriptsDir .. "/display.sh"
 local wallpaper      = scriptsDir .. "/wallpaper.sh"
 local wallpaperPicker = scriptsDir .. "/wallpaper-picker.sh"
 local lock           = "hyprlock"
@@ -28,10 +27,12 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(lock), { locked = true })
 hl.bind(mainMod .. " + SPACE",       hl.dsp.exec_cmd(launcher))
+hl.bind(mainMod .. " + K",           hl.dsp.exec_cmd(scriptsDir .. "/keybinds.sh"), { description = "Show Keybinds" })
 hl.bind(mainMod .. " + ALT + SPACE", hl.dsp.exec_cmd("pkill rofi; rofi -show power-menu -modi power-menu:" .. powerMenu))
 hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("killall -SIGUSR1 waybar"))
 hl.bind(mainMod .. " + slash",     hl.dsp.exec_cmd(monitorScaling))
 hl.bind(mainMod .. " + ALT + slash", hl.dsp.exec_cmd(monitorScaling .. " --reverse"))
+hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd(displayMenu))
 hl.bind(mainMod .. " + ALT + E",     hl.dsp.exec_cmd(emojiPicker))
 hl.bind(mainMod .. " + W",           hl.dsp.exec_cmd(wallpaper .. " random"))
 hl.bind(mainMod .. " + SHIFT + W",   hl.dsp.exec_cmd("pkill rofi; rofi -modi \"wallpaper:" .. wallpaperPicker .. "\" -show wallpaper"))
@@ -50,7 +51,6 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
 hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 

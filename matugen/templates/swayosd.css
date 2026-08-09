@@ -18,6 +18,10 @@ window#osd label {
   color: @label;
 }
 
+window#osd image {
+  -gtk-icon-size: 24px;
+}
+
 window#osd label {
   font-size: 14px;
 }

@@ -8,7 +8,7 @@
   "modules-left": ["custom/arch", "hyprland/workspaces"],
   "modules-center": ["clock"],
   "modules-right": [
-    "group/tray-expander",
+    "tray",
     "bluetooth",
     "network",
     "pulseaudio",
@@ -102,22 +102,6 @@
       "headset": "",
       "default": ["", "", ""]
     }
-  },
-  "group/tray-expander": {
-    "orientation": "inherit",
-    "drawer": {
-      "transition-duration": 600,
-      "children-class": "tray-group-item"
-    },
-    "modules": ["custom/expand-icon", "tray"]
-  },
-  "custom/expand-icon": {
-    "format": "",
-    "tooltip": false,
-    "on-scroll-up": "",
-    "on-scroll-down": "",
-    "on-scroll-left": "",
-    "on-scroll-right": ""
   },
   "tray": {
     "icon-size": 12,

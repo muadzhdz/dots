@@ -81,3 +81,8 @@ output_path = "generated/hyprlock-colors.conf"
 input_path = "templates/swayosd.css"
 output_path = "~/.config/swayosd/style.css"
 post_hook = "systemctl --user restart swayosd-server.service 2>/dev/null || true"
+
+[templates.sddm]
+input_path = "templates/sddm.conf"
+output_path = "generated/sddm.conf"
+post_hook = "sudo -n $HOME/.config/scripts/sddm-sync.sh 2>/dev/null || true"
