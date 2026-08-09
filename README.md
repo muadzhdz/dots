@@ -29,7 +29,7 @@ git clone https://github.com/muadzhdz/dots && cd dots
 
 Then:
 
-1. Reload your shell (`source ~/.bashrc`) for the long-format `ls` alias
+1. Reload your shell (`source ~/.bashrc`) — your aliases + prompt come from the repo's `bashrc` (the installer backs up an existing `~/.bashrc` to `~/.bashrc.bak` first)
 2. Log out, log in from the SDDM screen
 3. A bundled wallpaper (`wallpapers/monstera.png`) is staged as the default — it applies on first Hyprland start. Drop your own images into `~/Pictures/Wallpapers/` and use `SUPER + W` (random) / `SUPER + SHIFT + W` (picker) to switch.
 

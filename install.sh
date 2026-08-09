@@ -153,15 +153,15 @@ else
 fi
 
 # ---------------------------------------------------------------
-#  9. Misc: bashrc ls alias, default wallpaper
+#  9. Misc: bashrc, default wallpaper
 # ---------------------------------------------------------------
-if ! grep -qs "alias ls='ls -lh --color=auto'" "$HOME/.bashrc" 2>/dev/null; then
-    {
-        echo ""
-        echo "# dots: long-format ls with colors"
-        echo "alias ls='ls -lh --color=auto'"
-    } >> "$HOME/.bashrc"
-    log "  added ls alias to ~/.bashrc"
+if [[ -f "$SCRIPT_DIR/bashrc" ]]; then
+    if [[ -f "$HOME/.bashrc" ]] && ! cmp -s "$HOME/.bashrc" "$SCRIPT_DIR/bashrc"; then
+        cp "$HOME/.bashrc" "$HOME/.bashrc.bak"
+        log "  existing ~/.bashrc backed up to ~/.bashrc.bak"
+    fi
+    cp "$SCRIPT_DIR/bashrc" "$HOME/.bashrc"
+    log "  installed ~/.bashrc from repo"
 fi
 
 # Default wallpaper shipped with the repo so the user has one on first boot.
@@ -193,7 +193,7 @@ cat <<EOF
 ${GRN}Installation complete!${RST}
 
 Next steps:
-  1. Reload the shell (source ~/.bashrc) for the new ls alias
+  1. Reload the shell (source ~/.bashrc) — aliases + prompt from repo's bashrc
   2. Log out, switch to sddm, log back in
   3. A default wallpaper (monstera.png) is already staged — it applies on
      first Hyprland start. Drop your own images into ~/Pictures/Wallpapers/
