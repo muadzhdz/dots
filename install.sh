@@ -47,6 +47,7 @@ OFFICIAL_PKGS=(
     gnome-disk-utility eza xdg-user-dirs
     fastfetch zip unzip
     chromium firefox
+    neovim xdg-desktop-portal-hyprland
 )
 
 AUR_PKGS=(
@@ -57,6 +58,7 @@ AUR_PKGS=(
     zen-browser-bin
     helium-browser-bin
     tor-browser-bin
+    visual-studio-code-bin
 )
 
 # ---------------------------------------------------------------
