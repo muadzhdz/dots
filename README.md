@@ -29,10 +29,9 @@ git clone https://github.com/muadzhdz/dots && cd dots
 
 Then:
 
-1. Put wallpapers in `~/Pictures/Wallpapers/`
-2. Reload your shell (`source ~/.bashrc`) for the long-format `ls` alias
-3. Log out, log in from the SDDM screen
-4. First time, run: `~/.config/scripts/wallpaper.sh init`
+1. Reload your shell (`source ~/.bashrc`) for the long-format `ls` alias
+2. Log out, log in from the SDDM screen
+3. A bundled wallpaper (`wallpapers/monstera.png`) is staged as the default — it applies on first Hyprland start. Drop your own images into `~/Pictures/Wallpapers/` and use `SUPER + W` (random) / `SUPER + SHIFT + W` (picker) to switch.
 
 `matugen/generated/` is committed so colors work even before running matugen.
 

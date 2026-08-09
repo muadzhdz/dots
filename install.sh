@@ -153,7 +153,7 @@ else
 fi
 
 # ---------------------------------------------------------------
-#  9. Misc: bashrc ls alias, wallpaper dir
+#  9. Misc: bashrc ls alias, default wallpaper
 # ---------------------------------------------------------------
 if ! grep -qs "alias ls='ls -lh --color=auto'" "$HOME/.bashrc" 2>/dev/null; then
     {
@@ -164,7 +164,26 @@ if ! grep -qs "alias ls='ls -lh --color=auto'" "$HOME/.bashrc" 2>/dev/null; then
     log "  added ls alias to ~/.bashrc"
 fi
 
+# Default wallpaper shipped with the repo so the user has one on first boot.
+# It's only applied if no wallpaper has been set yet — after that, their own
+# collection in ~/Pictures/Wallpapers/ takes over.
 mkdir -p "$HOME/Pictures/Wallpapers"
+DEFAULT_WALL="$SCRIPT_DIR/wallpapers/monstera.png"
+CACHE_FILE="$DEST/scripts/.current_wallpaper"
+if [[ -f "$DEFAULT_WALL" ]]; then
+    if [[ -f "$CACHE_FILE" ]] && [[ -f "$(cat "$CACHE_FILE")" ]]; then
+        warn "  wallpaper already set — leaving ~/Pictures/Wallpapers untouched"
+    else
+        if [[ ! -f "$HOME/Pictures/Wallpapers/monstera.png" ]]; then
+            cp "$DEFAULT_WALL" "$HOME/Pictures/Wallpapers/monstera.png"
+            log "  copied default wallpaper to ~/Pictures/Wallpapers/monstera.png"
+        fi
+        echo "$HOME/Pictures/Wallpapers/monstera.png" > "$CACHE_FILE"
+        log "  default wallpaper staged — it will apply on first Hyprland start"
+    fi
+else
+    warn "  no bundled wallpaper found — run wallpaper.sh init after first boot"
+fi
 
 # ---------------------------------------------------------------
 #  10. Done
@@ -174,11 +193,11 @@ cat <<EOF
 ${GRN}Installation complete!${RST}
 
 Next steps:
-  1. Put your wallpapers in ~/Pictures/Wallpapers/
-  2. Reload the shell (source ~/.bashrc) for the new ls alias
-  3. Log out, switch to sddm, log back in
-  4. First time, set a wallpaper:
-       ~/.config/scripts/wallpaper.sh init
+  1. Reload the shell (source ~/.bashrc) for the new ls alias
+  2. Log out, switch to sddm, log back in
+  3. A default wallpaper (monstera.png) is already staged — it applies on
+     first Hyprland start. Drop your own images into ~/Pictures/Wallpapers/
+     and use SUPER+W (random) / SUPER+SHIFT+W (picker) to switch.
 
 Notes:
   * Requires Hyprland >= 0.55 (config uses the Lua API)
