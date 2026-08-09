@@ -39,11 +39,11 @@ Then:
 
 ## Dependencies
 
-Installed automatically by `install.sh`. The AUR packages need a helper (`paru`/`yay`) — the installer bootsraps `paru` if you don't have one.
+Installed automatically by `install.sh`. The installer sets up **both** `paru` and `yay` (AUR helpers), then asks which browser(s) you want: chromium, firefox, zen-browser, helium-browser, tor-browser (pick one or several).
 
-**Official (pacman):** hyprland, hypridle, hyprlock, waybar, mako, rofi, kitty, ghostty, cliphist, grim, slurp, satty, jq, playerctl, pamixer, btop, cava, qt6ct, bluez, bluez-utils, networkmanager, iwd, sddm, polkit-kde-agent, bluetui, wiremix, impala, matugen, swayosd
+**Official (pacman):** hyprland, hypridle, hyprlock, waybar, mako, rofi, kitty, ghostty, cliphist, grim, slurp, satty, hyprpicker, tesseract, tesseract-data-eng, jq, playerctl, pamixer, btop, cava, qt6ct, bluez, bluez-utils, networkmanager, iwd, sddm, polkit-kde-agent, bluetui, wiremix, impala, matugen, swayosd, awww, libnotify, bc, brightnessctl, nautilus, obs-studio, cmatrix, tree, chafa, mpv, imv, gnome-disk-utility, wl-clipboard, wireplumber, pipewire-pulse, ttf-jetbrains-mono-nerd, noto-fonts, ttf-dejavu, adw-gtk-theme, papirus-icon-theme, kvantum, eza, xdg-user-dirs, fastfetch, zip, unzip
 
-**AUR:** sddm-silent-theme, ttf-material-symbols-variable-git, redhat-fonts, yaru-gtk-theme, adw-gtk3
+**AUR:** sddm-silent-theme, ttf-material-symbols-variable-git, redhat-fonts, yaru-gtk-theme, zen-browser-bin, helium-browser-bin, tor-browser-bin
 
 ## Keybinds
 

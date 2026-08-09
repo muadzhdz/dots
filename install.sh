@@ -37,7 +37,16 @@ OFFICIAL_PKGS=(
     jq playerctl pamixer btop cava qt6ct
     bluez bluez-utils networkmanager iwd sddm
     polkit-kde-agent bluetui wiremix impala
-    matugen swayosd
+    matugen swayosd awww
+    hyprpicker tesseract tesseract-data-eng libnotify bc nautilus
+    brightnessctl
+    wl-clipboard wireplumber pipewire-pulse
+    ttf-jetbrains-mono-nerd noto-fonts ttf-dejavu
+    adw-gtk-theme papirus-icon-theme kvantum
+    obs-studio cmatrix tree chafa mpv imv
+    gnome-disk-utility eza xdg-user-dirs
+    fastfetch zip unzip
+    chromium firefox
 )
 
 AUR_PKGS=(
@@ -45,41 +54,80 @@ AUR_PKGS=(
     ttf-material-symbols-variable-git
     redhat-fonts
     yaru-gtk-theme
-    adw-gtk3
+    zen-browser-bin
+    helium-browser-bin
+    tor-browser-bin
 )
 
 # ---------------------------------------------------------------
-#  3. AUR helper
+#  3. AUR helper (install BOTH paru and yay)
 # ---------------------------------------------------------------
-AUR_HELPER=""
-for h in paru yay; do
-    if command -v "$h" >/dev/null 2>&1; then
-        AUR_HELPER="$h"
-        break
-    fi
-done
-
-if [[ -z "$AUR_HELPER" ]]; then
-    log "No AUR helper found. Installing paru..."
-    sudo pacman -S --needed --noconfirm base-devel git
+log "Ensuring AUR helpers (paru + yay)..."
+if ! command -v paru >/dev/null 2>&1 && ! command -v yay >/dev/null 2>&1; then
+    log "No AUR helper found. Installing paru first..."
+    sudo pacman -S --needed --noconfirm base-devel git rust
     git clone https://aur.archlinux.org/paru.git /tmp/paru-bin
     (cd /tmp/paru-bin && makepkg -si --noconfirm)
     rm -rf /tmp/paru-bin
-    AUR_HELPER="paru"
 fi
-log "Using AUR helper: $AUR_HELPER"
+
+if ! command -v yay >/dev/null 2>&1; then
+    log "Installing yay via paru..."
+    paru -S --needed --noconfirm yay
+fi
+
+if ! command -v paru >/dev/null 2>&1; then
+    log "Installing paru via yay..."
+    yay -S --needed --noconfirm paru
+fi
+
+command -v paru >/dev/null 2>&1 && AUR_HELPER="paru" || AUR_HELPER="yay"
+log "Using AUR helper: $AUR_HELPER (paru and yay both installed)"
 
 # ---------------------------------------------------------------
-#  4. Install packages
+#  4. Browser selection (multi-select, one or many)
 # ---------------------------------------------------------------
-log "[1/6] Installing official packages..."
+choose_browsers() {
+    printf "\n${CYN}Pick browser(s) to install (comma-separated, e.g. '1,3,5'):${RST}\n"
+    printf "  ${GRN}1${RST}) chromium\n"
+    printf "  ${GRN}2${RST}) firefox\n"
+    printf "  ${GRN}3${RST}) zen-browser\n"
+    printf "  ${GRN}4${RST}) helium-browser\n"
+    printf "  ${GRN}5${RST}) tor-browser\n"
+    printf "  ${YLW}0${RST}) none\n"
+    printf "  ${CYN}> ${RST}"
+    read -r answer
+    answer="${answer// /}"
+    [[ -z "$answer" ]] && return 0
+    [[ "$answer" == "all" ]] && { OFFICIAL_PKGS+=("chromium" "firefox"); AUR_PKGS+=("zen-browser-bin" "helium-browser-bin" "tor-browser-bin"); return 0; }
+
+    local n
+    IFS=',' read -r -a nums <<< "$answer"
+    for n in "${nums[@]}"; do
+        case "$n" in
+            0) return 0 ;;
+            1) OFFICIAL_PKGS+=("chromium") ;;
+            2) OFFICIAL_PKGS+=("firefox") ;;
+            3) AUR_PKGS+=("zen-browser-bin") ;;
+            4) AUR_PKGS+=("helium-browser-bin") ;;
+            5) AUR_PKGS+=("tor-browser-bin") ;;
+            *) warn "Skipping invalid choice: $n" ;;
+        esac
+    done
+}
+choose_browsers
+
+# ---------------------------------------------------------------
+#  5. Install packages
+# ---------------------------------------------------------------
+log "[1/7] Installing official packages..."
 sudo pacman -S --needed --noconfirm "${OFFICIAL_PKGS[@]}"
 
-log "[2/6] Installing AUR packages..."
+log "[2/7] Installing AUR packages..."
 $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"
 
 # ---------------------------------------------------------------
-#  5. Copy configs
+#  6. Copy configs
 # ---------------------------------------------------------------
 copy_to() { # $1=src  $2=dst
     echo "  -> $2"
@@ -87,7 +135,7 @@ copy_to() { # $1=src  $2=dst
     cp -r "$SCRIPT_DIR/$1/." "$DEST/$2/"
 }
 
-log "[3/6] Copying configs to $DEST"
+log "[3/7] Copying configs to $DEST"
 copy_to hypr           hypr
 copy_to matugen        matugen
 copy_to scripts        scripts
@@ -103,30 +151,38 @@ copy_to ghostty        ghostty
 copy_to qt6ct          qt6ct
 copy_to gtk/gtk-3.0    gtk-3.0
 copy_to gtk/gtk-4.0    gtk-4.0
+copy_to obs-studio     obs-studio
 
 chmod +x "$DEST"/scripts/*.sh 2>/dev/null || true
 
 # ---------------------------------------------------------------
-#  6. User services
+#  7. User services
 # ---------------------------------------------------------------
-log "[4/6] Enabling user services..."
+log "[4/7] Enabling user services..."
 systemctl --user daemon-reload
 systemctl --user enable --now graphical-session.target 2>/dev/null || true
 systemctl --user enable --now swayosd-server.service 2>/dev/null || true
 
+# swayosd needs write access to /sys/class/backlight/*/brightness,
+# which is group-writable by the 'video' group (see 99-swayosd.rules).
+if ! id -nG | tr ' ' '\n' | grep -qx video; then
+    sudo usermod -aG video "$USER"
+    warn "  added $USER to the 'video' group — re-login for brightness keys to work"
+fi
+
 # ---------------------------------------------------------------
-#  7. System services (NetworkManager / bluetooth / iwd)
+#  8. System services (NetworkManager / bluetooth / iwd)
 # ---------------------------------------------------------------
-log "[5/6] Enabling system services..."
+log "[5/7] Enabling system services..."
 sudo systemctl enable --now NetworkManager 2>/dev/null || true
 sudo systemctl enable --now bluetooth 2>/dev/null || true
 [[ -d /etc/NetworkManager/conf.d ]] && \
     printf '[device]\nwifi.backend=iwd\n' | sudo tee /etc/NetworkManager/conf.d/wifi-backend.conf >/dev/null
 
 # ---------------------------------------------------------------
-#  8. SDDM (theme + config + sudoers for wallpaper sync)
+#  9. SDDM (theme + config + sudoers for wallpaper sync)
 # ---------------------------------------------------------------
-log "[6/6] Setting up SDDM..."
+log "[6/7] Setting up SDDM..."
 
 sudo mkdir -p /etc/sddm.conf.d
 if [[ -f /usr/share/sddm/themes/silent/Main.qml ]]; then
@@ -153,16 +209,22 @@ else
 fi
 
 # ---------------------------------------------------------------
-#  9. Misc: bashrc, default wallpaper
+#  10. Misc: bashrc, user dirs, default wallpaper
 # ---------------------------------------------------------------
+log "[7/7] Installing bashrc, user directories, wallpaper..."
+
+# Install repo bashrc (no backup — repo is the source of truth)
 if [[ -f "$SCRIPT_DIR/bashrc" ]]; then
-    if [[ -f "$HOME/.bashrc" ]] && ! cmp -s "$HOME/.bashrc" "$SCRIPT_DIR/bashrc"; then
-        cp "$HOME/.bashrc" "$HOME/.bashrc.bak"
-        log "  existing ~/.bashrc backed up to ~/.bashrc.bak"
-    fi
     cp "$SCRIPT_DIR/bashrc" "$HOME/.bashrc"
-    log "  installed ~/.bashrc from repo"
+    log "  installed ~/.bashrc from repo (aliases + eza icons)"
 fi
+
+# Standard user directories (GTK file managers icon them via xdg-user-dirs)
+for d in Downloads Documents Music Pictures Videos Projects; do
+    mkdir -p "$HOME/$d"
+done
+command -v xdg-user-dirs-update >/dev/null 2>&1 && xdg-user-dirs-update 2>/dev/null || true
+log "  created ~/Downloads ~/Documents ~/Music ~/Pictures ~/Videos ~/Projects"
 
 # Default wallpaper shipped with the repo so the user has one on first boot.
 # It's only applied if no wallpaper has been set yet — after that, their own
@@ -186,18 +248,20 @@ else
 fi
 
 # ---------------------------------------------------------------
-#  10. Done
+#  11. Done
 # ---------------------------------------------------------------
 cat <<EOF
 
 ${GRN}Installation complete!${RST}
 
 Next steps:
-  1. Reload the shell (source ~/.bashrc) — aliases + prompt from repo's bashrc
+  1. Reload the shell (source ~/.bashrc) — aliases + eza icons + prompt from repo's bashrc
   2. Log out, switch to sddm, log back in
   3. A default wallpaper (monstera.png) is already staged — it applies on
      first Hyprland start. Drop your own images into ~/Pictures/Wallpapers/
      and use SUPER+W (random) / SUPER+SHIFT+W (picker) to switch.
+  4. User directories are ready: ~/Downloads ~/Documents ~/Music ~/Pictures
+     ~/Videos ~/Projects (folder icons show in file managers and terminal via eza)
 
 Notes:
   * Requires Hyprland >= 0.55 (config uses the Lua API)
@@ -205,4 +269,5 @@ Notes:
     (SUPER+W random, SUPER+SHIFT+W picker)
   * SDDM theme will mirror your current wallpaper automatically
     (matugen post_hook runs sddm-sync.sh via the sudoers rule above)
+  * Both paru and yay are installed; use whichever you prefer.
 EOF
