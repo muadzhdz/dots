@@ -1,7 +1,7 @@
 @import url("../matugen/generated/waybar.css");
 
 window#waybar {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: alpha(@surface-container, 0.75);
   border: none;
 }
 
