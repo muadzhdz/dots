@@ -7,6 +7,9 @@ Every component (waybar, kitty, rofi, mako, swayosd, btop, cava, ghostty, GTK, b
 ## Features
 
 - **Material You theming** — one wallpaper drives every app color via matugen (waybar, kitty, ghostty, rofi, mako, swayosd, btop, cava, GTK3/4, hyprlock, hyprland borders, SDDM login screen)
+- **Moveable waybar** — the bar lives on all four screen edges: top/bottom bars are horizontal, left/right are vertical (rotated). Workspace transitions (slide vs slidevert) and the 3-finger swipe gesture follow the bar's orientation. On switch, the old bar fades out and the new one slides in from its own edge. `SUPER + ALT + W` cycles, `SUPER + ALT + SHIFT + W` opens a position menu.
+- **Default browser switcher** (`SUPER + ALT + B`) — rofi menu that lists every installed browser and sets the system default via `xdg-settings`/`xdg-mime` (supports firefox, chromium, zen, helium, brave, chrome)
+- **Web apps manager** (`SUPER + SHIFT + A`) — `webapp-installer.sh` generates `.desktop` entries for sites you want as standalone apps
 - **Wallpaper daemon** — `awww` with animated crossfade transitions
 - **hypridle** — auto lock after 10 min, DPMS off after 10:30
 - **Keybinds menu** (`SUPER + K`) — interactive rofi list generated straight from `binds.lua`, with executable actions
@@ -16,7 +19,7 @@ Every component (waybar, kitty, rofi, mako, swayosd, btop, cava, ghostty, GTK, b
 
 ## Components
 
-Hyprland, waybar, mako, rofi (wayland), kitty, ghostty, hyprlock, hypridle, matugen, awww, swayosd, cliphist, grim/slurp/satty, nautilus, bluetui, wiremix, impala.
+Hyprland, waybar, mako, rofi (wayland), kitty, ghostty, hyprlock, hypridle, matugen, awww, swayosd, cliphist, grim/slurp/satty, hyprpicker, nautilus, bluetui, wiremix, impala, neovim, obs-studio.
 
 ## Install
 
@@ -39,11 +42,11 @@ Then:
 
 ## Dependencies
 
-Installed automatically by `install.sh`. The installer sets up **both** `paru` and `yay` (AUR helpers), then asks which browser(s) you want: chromium, firefox, zen-browser, helium-browser, tor-browser (pick one or several).
+Installed automatically by `install.sh`. The installer sets up **both** `paru` and `yay` (AUR helpers), then asks which browser(s) you want: chromium, firefox, zen-browser, helium-browser, tor-browser (pick one or several, or all).
 
-**Official (pacman):** hyprland, hypridle, hyprlock, waybar, mako, rofi, kitty, ghostty, cliphist, grim, slurp, satty, hyprpicker, tesseract, tesseract-data-eng, jq, playerctl, pamixer, btop, cava, qt6ct, bluez, bluez-utils, networkmanager, iwd, sddm, polkit-kde-agent, bluetui, wiremix, impala, matugen, swayosd, awww, libnotify, bc, brightnessctl, nautilus, obs-studio, cmatrix, tree, chafa, mpv, imv, gnome-disk-utility, wl-clipboard, wireplumber, pipewire-pulse, ttf-jetbrains-mono-nerd, noto-fonts, ttf-dejavu, adw-gtk-theme, papirus-icon-theme, kvantum, eza, xdg-user-dirs, fastfetch, zip, unzip
+**Official (pacman):** hyprland, hypridle, hyprlock, waybar, mako, rofi, kitty, ghostty, cliphist, grim, slurp, satty, hyprpicker, tesseract, tesseract-data-eng, jq, playerctl, pamixer, btop, cava, qt6ct, bluez, bluez-utils, networkmanager, iwd, sddm, polkit-kde-agent, bluetui, wiremix, impala, matugen, swayosd, awww, libnotify, bc, brightnessctl, nautilus, obs-studio, neovim, xdg-desktop-portal-hyprland, cmatrix, tree, chafa, mpv, imv, gnome-disk-utility, wl-clipboard, wireplumber, pipewire-pulse, ttf-jetbrains-mono-nerd, noto-fonts, ttf-dejavu, adw-gtk-theme, papirus-icon-theme, kvantum, eza, xdg-user-dirs, fastfetch, zip, unzip, chromium, firefox
 
-**AUR:** sddm-silent-theme, ttf-material-symbols-variable-git, redhat-fonts, yaru-gtk-theme, zen-browser-bin, helium-browser-bin, tor-browser-bin
+**AUR:** sddm-silent-theme, ttf-material-symbols-variable-git, redhat-fonts, yaru-gtk-theme, zen-browser-bin, helium-browser-bin, tor-browser-bin, visual-studio-code-bin
 
 ## Keybinds
 
@@ -60,10 +63,14 @@ Installed automatically by `install.sh`. The installer sets up **both** `paru` a
 | `SUPER + T` / `+ P` | toggle float / pseudo-tile |
 | `SUPER + J` | toggle split layout |
 | `SUPER + W` / `+ SHIFT + W` | random wallpaper / picker |
+| `SUPER + ALT + W` / `+ SHIFT + W` | cycle waybar position / position menu |
+| `SUPER + SHIFT + SPACE` | toggle waybar visibility |
 | `SUPER + V` | clipboard history |
 | `SUPER + S` / `+ SHIFT + V` | scratchpad / move to scratchpad |
 | `SUPER + L` | lock (hyprlock) |
 | `SUPER + M` | exit session |
+| `SUPER + ALT + B` | default browser switcher |
+| `SUPER + SHIFT + A` | web apps manager |
 | `Print` / `SUPER + SHIFT + S` | screenshot |
 | `SUPER + Print` | OCR screenshot |
 | `SUPER + ALT + E` | emoji picker |
@@ -75,6 +82,20 @@ Installed automatically by `install.sh`. The installer sets up **both** `paru` a
 | `SUPER + mouse_down` / `mouse_up` | next / previous workspace |
 | `SUPER + LMB` / `RMB` | move / resize window |
 | `XF86Audio*`, `XF86MonBrightness*` | volume / brightness (swayosd) |
+
+## Waybar
+
+Managed by `scripts/waybar-position.sh` (called with `init` from `hypr/modules/autostart.lua`). It supports `init`, `cycle`, `menu`, or a direct position: `top` / `bottom` / `left` / `right`.
+
+What changes on each position:
+
+- **Waybar config** — top/bottom: 1000×37 horizontal bar; left/right: 37×1000 vertical bar (clock rotated 270°). Current position is cached in `~/.config/waybar/.current_position`
+- **Workspace transitions** — top/bottom use horizontal `slide`; left/right use vertical `slidevert`. The special (scratchpad) workspace always slides in the opposite axis
+- **3-finger swipe gesture** — horizontal swipe when the bar is at top/bottom, vertical swipe when it's at left/right
+- **Rofi** — keeps its directional entrance: when the waybar is on the left, rofi slides in from the right, and vice versa (per-layer rule, so mako/swayosd are unaffected)
+- **Bar transition** — switching positions kills the old bar (it fades out via `layersOut` = fade) and the new bar slides in from its own edge (`layersIn` = slide), so there's no cross-screen travel
+
+The waybar background is `alpha(@surface-container, 0.75)` from the matugen palette, so it recolors with every wallpaper change (template: `matugen/templates/waybar.css`, applied via `post_hook = "pkill -SIGUSR2 waybar"`).
 
 ## SDDM
 
