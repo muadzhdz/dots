@@ -40,6 +40,7 @@ output_path = "~/.cache/matugen/vscode-colors.json"
 [templates.neovim]
 input_path = "templates/neovim-theme-spec.lua"
 output_path = "generated/neovim-theme-spec.lua"
+post_hook = "for s in /run/user/$(id -u)/nvim.*; do [[ -e \"$s\" ]] && nvim --server \"$s\" --remote-send '<Cmd>colorscheme matugen<CR>' 2>/dev/null || true; done"
 
 [templates.chromium]
 input_path = "templates/chromium-colors.conf"
@@ -50,9 +51,13 @@ post_hook = "bash $HOME/.config/scripts/generate-browser-themes.sh 2>/dev/null |
 input_path = "templates/firefox_websites.css"
 output_path = "generated/firefox_websites.css"
 
+[templates.firefox-userchrome]
+input_path = "templates/firefox-userchrome.css"
+output_path = "generated/firefox-userchrome.css"
+
 [templates.zen]
 input_path = "templates/zen-userchrome.css"
-output_path = "~/.zen/matugen/chrome/userChrome.css"
+output_path = "generated/zen-userchrome.css"
 
 [templates.btop]
 input_path = "templates/btop.theme"
@@ -62,6 +67,7 @@ post_hook = "pkill -USR2 btop 2>/dev/null || true"
 [templates.gtk4]
 input_path = "templates/gtk4.css"
 output_path = "~/.config/gtk-4.0/gtk.css"
+post_hook = "if pgrep -x nautilus >/dev/null; then bash $HOME/.config/scripts/reload-nautilus.sh 2>/dev/null || true; fi"
 
 [templates.gtk3]
 input_path = "templates/gtk3.css"

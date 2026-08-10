@@ -7,7 +7,7 @@ configuration {
     /* ─────────────────────────────────────────────────────────────────────
        Display & Font
        ───────────────────────────────────────────────────────────────────── */
-    show-icons:     true;
+    show-icons:     false;
     icon-theme:     "Papirus-Dark";
     font:           "JetBrainsMono Nerd Font 11";
     /* ─────────────────────────────────────────────────────────────────────
@@ -220,7 +220,7 @@ element {
 }
 
 element-icon {
-    /* Smaller icon = less wasted space when no icon present */
+    enabled:            false;
     size:               1.2em;
     vertical-align:     0.5;
     background-color:   transparent;

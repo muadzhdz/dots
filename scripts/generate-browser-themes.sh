@@ -56,4 +56,42 @@ HELIUM_DIR="$HOME/.config/helium/Default/Extensions/matugen-theme"
 mkdir -p "$HELIUM_DIR"
 cp "$CHROMIUM_DIR/manifest.json" "$HELIUM_DIR/manifest.json"
 
+# Sync Firefox userChrome.css across all Firefox profiles
+FIREFOX_CSS="$HOME/.config/matugen/generated/firefox-userchrome.css"
+if [ -f "$FIREFOX_CSS" ]; then
+    for profile in "$HOME/.config/mozilla/firefox/"* "$HOME/.mozilla/firefox/"*; do
+        if [ -d "$profile" ]; then
+            bname=$(basename "$profile")
+            if [[ "$bname" != "Crash Reports" && "$bname" != "Pending Pings" && "$bname" != "Profile Groups" && "$bname" != "Pending Deletes" ]]; then
+                if [[ -f "$profile/prefs.js" ]] || [[ -f "$profile/user.js" ]] || [[ "$bname" == *.default* ]]; then
+                    mkdir -p "$profile/chrome"
+                    cp "$FIREFOX_CSS" "$profile/chrome/userChrome.css"
+                    USER_JS="$profile/user.js"
+                    if ! grep -qs "toolkit.legacyUserProfileCustomizations.stylesheets" "$USER_JS" 2>/dev/null; then
+                        echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$USER_JS"
+                    fi
+                fi
+            fi
+        fi
+    done
+fi
+
+# Sync Zen Browser userChrome.css across all Zen profiles
+ZEN_CSS="$HOME/.config/matugen/generated/zen-userchrome.css"
+if [ -f "$ZEN_CSS" ]; then
+    for profile in "$HOME/.zen/"* "$HOME/.config/zen/"*; do
+        if [ -d "$profile" ]; then
+            bname=$(basename "$profile")
+            if [[ "$bname" != "Crash Reports" && "$bname" != "Pending Pings" && "$bname" != "Profile Groups" && "$bname" != "Pending Deletes" ]]; then
+                mkdir -p "$profile/chrome"
+                cp "$ZEN_CSS" "$profile/chrome/userChrome.css"
+                USER_JS="$profile/user.js"
+                if ! grep -qs "toolkit.legacyUserProfileCustomizations.stylesheets" "$USER_JS" 2>/dev/null; then
+                    echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$USER_JS"
+                fi
+            fi
+        fi
+    done
+fi
+
 echo "Browser themes generated"

@@ -3,25 +3,82 @@
 window#waybar {
   background-color: rgba(0, 0, 0, 0.5);
   border: none;
+}
+
+/* Position-aware rounded corners */
+window#waybar.top {
   border-radius: 0 0 20px 20px;
+}
+
+window#waybar.bottom {
+  border-radius: 20px 20px 0 0;
+}
+
+window#waybar.left {
+  border-radius: 0 20px 20px 0;
+}
+
+window#waybar.right {
+  border-radius: 20px 0 0 20px;
 }
 
 * {
   background-color: transparent;
   color: @on-surface;
   border: none;
-  border-radius: 0 0 20px 20px;
-  min-height: 35px;
   font-family: 'JetBrainsMono Nerd Font';
   font-size: 13px;
 }
 
-.modules-left {
+/* Horizontal Layout (Top & Bottom) */
+window#waybar.top *,
+window#waybar.bottom * {
+  min-height: 35px;
+}
+
+window#waybar.top .modules-left,
+window#waybar.bottom .modules-left {
   margin-left: 20px;
 }
 
-.modules-right {
+window#waybar.top .modules-right,
+window#waybar.bottom .modules-right {
   margin-right: 20px;
+}
+
+/* Vertical Layout (Left & Right) */
+window#waybar.left *,
+window#waybar.right * {
+  min-height: 0;
+  min-width: 0;
+}
+
+window#waybar.left .modules-left,
+window#waybar.right .modules-left {
+  margin-top: 20px;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+window#waybar.left .modules-right,
+window#waybar.right .modules-right {
+  margin-bottom: 20px;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+window#waybar.left #cpu,
+window#waybar.left #battery,
+window#waybar.left #pulseaudio,
+window#waybar.left #bluetooth,
+window#waybar.left #network,
+window#waybar.right #cpu,
+window#waybar.right #battery,
+window#waybar.right #pulseaudio,
+window#waybar.right #bluetooth,
+window#waybar.right #network {
+  margin: 7.5px 0;
+  padding: 0;
 }
 
 #custom-arch {
@@ -34,6 +91,12 @@ window#waybar {
   padding: 0 6px;
   margin: 0 1.5px;
   min-width: 9px;
+}
+
+window#waybar.left #workspaces button,
+window#waybar.right #workspaces button {
+  margin: 3.75px 0;
+  padding: 3.75px 0;
 }
 
 #workspaces button.empty {
@@ -65,4 +128,11 @@ tooltip {
 
 #clock {
   margin-left: 8.75px;
+}
+
+window#waybar.left #clock,
+window#waybar.right #clock {
+  margin-left: 0;
+  margin-top: 7.5px;
+  margin-bottom: 7.5px;
 }

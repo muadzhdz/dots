@@ -4,3 +4,9 @@ hypr/.vscode/
 hypr/.monitor-cache
 matugen/templates/test.txt
 gtk-3.0/bookmarks
+obs-studio/logs/
+obs-studio/profiler_data/
+obs-studio/.sentinel/
+obs-studio/plugin_config/obs-websocket/
+obs-studio/basic/scenes/
+systemd/user/*.wants/

@@ -154,6 +154,7 @@ copy_to qt6ct          qt6ct
 copy_to gtk/gtk-3.0    gtk-3.0
 copy_to gtk/gtk-4.0    gtk-4.0
 copy_to obs-studio     obs-studio
+copy_to nvim           nvim
 
 chmod +x "$DEST"/scripts/*.sh 2>/dev/null || true
 
