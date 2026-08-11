@@ -1,6 +1,15 @@
 [config]
 prefer = "darkness"
 
+[templates.grub-vars]
+input_path = "templates/grub-vars.sh"
+output_path = "~/.cache/matugen/grub-vars.sh"
+
+[templates.grub]
+input_path = "templates/grub-theme.txt"
+output_path = "generated/grub-theme.txt"
+post_hook = "sudo -n $HOME/.config/scripts/grub-sync.sh 2>/dev/null || true"
+
 [templates.rofi]
 input_path = "templates/rofi-colors.rasi"
 output_path = "generated/rofi-colors.rasi"
