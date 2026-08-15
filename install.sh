@@ -55,7 +55,6 @@ AUR_PKGS=(
     sddm-silent-theme
     ttf-material-symbols-variable-git
     redhat-fonts
-    yaru-gtk-theme
     zen-browser-bin
     helium-browser-bin
     tor-browser-bin
