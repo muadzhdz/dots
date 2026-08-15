@@ -27,6 +27,9 @@ ACTIVE_PROCS=(
     "transmission"
     "opencode"
     "kiro-cli"
+    "agy"
+    "codex"
+    "hermes"
 )
 for proc in "${ACTIVE_PROCS[@]}"; do
     if pgrep -f "$proc" >/dev/null 2>&1; then
