@@ -213,20 +213,6 @@ else
 fi
 
 # ---------------------------------------------------------------
-#  9b. GRUB (matugen theme + wallpaper sync)
-# ---------------------------------------------------------------
-if command -v grub-mkconfig >/dev/null 2>&1; then
-    SUDOERS_LINE="$USER ALL=(root) NOPASSWD: $DEST/scripts/grub-sync.sh"
-    if ! sudo grep -qs "grub-sync.sh" /etc/sudoers.d/grub-sync 2>/dev/null; then
-        echo "$SUDOERS_LINE" | sudo tee /etc/sudoers.d/grub-sync >/dev/null
-        sudo chmod 440 /etc/sudoers.d/grub-sync
-        log "  sudoers rule added for grub-sync.sh"
-    fi
-else
-    warn "  grub-mkconfig not found — skipping GRUB theming setup."
-fi
-
-# ---------------------------------------------------------------
 #  10. Misc: bashrc, user dirs, default wallpaper
 # ---------------------------------------------------------------
 log "[7/7] Installing bashrc, user directories, wallpaper..."

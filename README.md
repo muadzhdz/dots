@@ -15,7 +15,6 @@ Every component (waybar, kitty, rofi, mako, swayosd, btop, cava, ghostty, GTK, b
 - **Keybinds menu** (`SUPER + K`) — interactive rofi list generated straight from `binds.lua`, with executable actions
 - **Display menu** (`SUPER + D`) — pick a monitor, mode and scale via rofi; last selection is remembered across restarts
 - **SDDM mirror** — the login screen shows your current wallpaper (via `sddm-sync.sh`, auto-run by matugen)
-- **GRUB theme** — the boot menu mirrors your wallpaper too: heavily blurred background, rofi-style rounded panel, material-you highlight, and Nerd Font OS icons on every boot entry (via `grub-sync.sh`, auto-run by matugen)
 - **Polkit agent** — polkit-kde-agent autostarted
 
 ## Components
@@ -104,18 +103,6 @@ The waybar background is `alpha(@surface-container, 0.75)` from the matugen pale
 - `install.sh` writes `/etc/sddm.conf.d/silent-theme.conf` and enables `sddm.service`
 - The login screen mirrors your current wallpaper: matugen's `sddm` template renders a themed `default.conf`, then `sddm-sync.sh` copies the wallpaper + config into the theme dir. It runs as root via a passwordless sudoers rule (`/etc/sudoers.d/sddm-sync`) added for the installing user.
 - Everything is portable — no hardcoded user paths; the script resolves your home via `$SUDO_USER`.
-
-## GRUB
-
-- Managed by `scripts/grub-sync.sh` (runs as root via a passwordless sudoers rule, `/etc/sudoers.d/grub-sync`, added by `install.sh`; requires `imagemagick`, `os-prober`, and the `JetBrainsMono Nerd Font Mono` package)
-- matugen renders `templates/grub-theme.txt` → `generated/grub-theme.txt` plus color vars to `~/.cache/matugen/grub-vars.sh`, then `grub-sync.sh`:
-  - builds a heavily blurred + dimmed 1920×1080 background from the current wallpaper (ffmpeg)
-  - bakes in a rofi-style rounded panel (center, ~25% width, 10px radius, `rgba(0,0,0,0.4)` fill, material `primary` border)
-  - tints 9-slice pixmaps (`select_*.png`, `progress_*.png`) with the matugen palette
-  - converts JetBrainsMono Nerd Font to `.pf2` via `grub-mkfont` (cached)
-  - writes everything to `/boot/grub/themes/matugen/`, sets `GRUB_THEME`, `GRUB_GFXMODE=1920,1080,auto` and `GRUB_DISABLE_OS_PROBER=false` in `/etc/default/grub` (backed up to `grub.bak`), regenerates `grub.cfg`, and prefixes every boot entry with its Nerd Font OS icon (arch, windows, apple, ubuntu, debian, fedora, manjaro, mint, pop, kali, nixos, opensuse, gentoo, void, solus, zorin, deepin, freebsd, …)
-- Re-runs automatically on every wallpaper change (matugen post_hook). Panel size adapts to the number of boot entries (4–8 rows).
-- Note: entries generated dynamically at boot (e.g. via `uki` unified kernel images) get no icon — only text entries in `grub.cfg` are decorated.
 
 ## Credits
 

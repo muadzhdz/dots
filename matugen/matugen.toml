@@ -91,16 +91,11 @@ post_hook = "systemctl --user restart swayosd-server.service 2>/dev/null || true
 [templates.sddm]
 input_path = "templates/sddm.conf"
 output_path = "generated/sddm.conf"
-post_hook = "sudo -n $HOME/.config/scripts/sddm-sync.sh 2>/dev/null || true; sudo -n $HOME/.config/scripts/grub-sync.sh 2>/dev/null || true"
+post_hook = "sudo -n $HOME/.config/scripts/sddm-sync.sh 2>/dev/null || true"
 
 [templates.obs]
 input_path = "templates/matugen.obt"
 output_path = "~/.config/obs-studio/themes/matugen.obt"
-
-[templates.grub]
-input_path = "templates/grub-colors.sh"
-output_path = "generated/grub-colors.sh"
-post_hook = "sudo -n $HOME/.config/scripts/grub-sync.sh 2>/dev/null || echo '[matugen] grub-colors.sh updated. Run: sudo ~/.config/scripts/grub-sync.sh'"
 
 [templates.kvantum]
 input_path = "templates/kvantum-colors.kvconfig"
