@@ -35,7 +35,7 @@ OFFICIAL_PKGS=(
     hyprland hypridle hyprlock waybar mako rofi
     kitty ghostty cliphist grim slurp satty
     jq playerctl pamixer btop cava qt6ct
-    bluez bluez-utils networkmanager iwd sddm
+    bluez bluez-utils iwd sddm
     polkit-kde-agent bluetui wiremix impala
     matugen swayosd awww
     hyprpicker tesseract tesseract-data-eng libnotify bc nautilus
@@ -175,13 +175,23 @@ if ! id -nG | tr ' ' '\n' | grep -qx video; then
 fi
 
 # ---------------------------------------------------------------
-#  8. System services (NetworkManager / bluetooth / iwd)
+#  8. System services (systemd-networkd / iwd / bluetooth)
 # ---------------------------------------------------------------
 log "[5/7] Enabling system services..."
-sudo systemctl enable --now NetworkManager 2>/dev/null || true
+
+# systemd-networkd interface configs (Ethernet / Wi-Fi / WWAN via iwd)
+sudo mkdir -p /etc/systemd/network
+for nw in 20-ethernet.network 20-wlan.network 20-wwan.network; do
+    if [[ -f "$SCRIPT_DIR/networkd/$nw" ]]; then
+        sudo cp "$SCRIPT_DIR/networkd/$nw" "/etc/systemd/network/$nw"
+    fi
+done
+
+sudo systemctl enable --now systemd-networkd 2>/dev/null || true
+sudo systemctl enable --now systemd-resolved 2>/dev/null || true
+sudo systemctl enable --now iwd 2>/dev/null || true
 sudo systemctl enable --now bluetooth 2>/dev/null || true
-[[ -d /etc/NetworkManager/conf.d ]] && \
-    printf '[device]\nwifi.backend=iwd\n' | sudo tee /etc/NetworkManager/conf.d/wifi-backend.conf >/dev/null
+sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
 
 # ---------------------------------------------------------------
 #  9. SDDM (theme + config + sudoers for wallpaper sync)

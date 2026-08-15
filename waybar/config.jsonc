@@ -51,6 +51,7 @@
     "tooltip": false
   },
   "network": {
+    "use-networkmanager": false,
     "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
     "format": "{icon}",
     "format-wifi": "{icon}",
