@@ -15,3 +15,10 @@ hl.config({
         },
     },
 })
+
+-- 3-finger swipe to switch workspaces
+hl.gesture({
+    fingers = 3,
+    direction = "horizontal",
+    action = "workspace",
+})
