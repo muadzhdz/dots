@@ -1,7 +1,7 @@
 @import url("../matugen/generated/waybar.css");
 
 window#waybar {
-  background-color: alpha(@surface-container, 0.75);
+  background-color: alpha(@surface, 0.55);
   border: none;
 }
 
@@ -67,18 +67,33 @@ window#waybar.right .modules-right {
   margin-right: 0;
 }
 
+/* Reset semua margin horizontal saat posisi kiri/kanan,
+   ganti dengan margin vertikal supaya icon tetap center */
 window#waybar.left #cpu,
 window#waybar.left #battery,
 window#waybar.left #pulseaudio,
 window#waybar.left #bluetooth,
 window#waybar.left #network,
+window#waybar.left #tray,
+window#waybar.left #workspaces,
+window#waybar.left #custom-arch,
 window#waybar.right #cpu,
 window#waybar.right #battery,
 window#waybar.right #pulseaudio,
 window#waybar.right #bluetooth,
-window#waybar.right #network {
-  margin: 7.5px 0;
+window#waybar.right #network,
+window#waybar.right #tray,
+window#waybar.right #workspaces,
+window#waybar.right #custom-arch {
+  margin: 4px 0;
   padding: 0;
+  min-width: 0;
+}
+
+/* Tray di vertikal — spacing jadi row bukan column */
+window#waybar.left #tray,
+window#waybar.right #tray {
+  margin: 4px 0;
 }
 
 #custom-arch {
@@ -120,6 +135,23 @@ window#waybar.right #workspaces button {
 
 #network {
   margin-right: 13px;
+}
+
+/* Override margin horizontal jadi 0 saat posisi vertikal */
+window#waybar.left #cpu,
+window#waybar.left #battery,
+window#waybar.left #pulseaudio,
+window#waybar.left #tray,
+window#waybar.left #bluetooth,
+window#waybar.left #network,
+window#waybar.right #cpu,
+window#waybar.right #battery,
+window#waybar.right #pulseaudio,
+window#waybar.right #tray,
+window#waybar.right #bluetooth,
+window#waybar.right #network {
+  margin: 4px 0;
+  min-width: 0;
 }
 
 tooltip {

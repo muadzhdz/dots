@@ -1,15 +1,6 @@
 [config]
 prefer = "darkness"
 
-[templates.grub-vars]
-input_path = "templates/grub-vars.sh"
-output_path = "~/.cache/matugen/grub-vars.sh"
-
-[templates.grub]
-input_path = "templates/grub-theme.txt"
-output_path = "generated/grub-theme.txt"
-post_hook = "sudo -n $HOME/.config/scripts/grub-sync.sh 2>/dev/null || true"
-
 [templates.rofi]
 input_path = "templates/rofi-colors.rasi"
 output_path = "generated/rofi-colors.rasi"
@@ -100,8 +91,18 @@ post_hook = "systemctl --user restart swayosd-server.service 2>/dev/null || true
 [templates.sddm]
 input_path = "templates/sddm.conf"
 output_path = "generated/sddm.conf"
-post_hook = "sudo -n $HOME/.config/scripts/sddm-sync.sh 2>/dev/null || true"
+post_hook = "sudo -n $HOME/.config/scripts/sddm-sync.sh 2>/dev/null || true; sudo -n $HOME/.config/scripts/grub-sync.sh 2>/dev/null || true"
 
 [templates.obs]
 input_path = "templates/matugen.obt"
 output_path = "~/.config/obs-studio/themes/matugen.obt"
+
+[templates.grub]
+input_path = "templates/grub-colors.sh"
+output_path = "generated/grub-colors.sh"
+post_hook = "sudo -n $HOME/.config/scripts/grub-sync.sh 2>/dev/null || echo '[matugen] grub-colors.sh updated. Run: sudo ~/.config/scripts/grub-sync.sh'"
+
+[templates.kvantum]
+input_path = "templates/kvantum-colors.kvconfig"
+output_path = "~/.config/Kvantum/MatugenDark/MatugenDark.kvconfig"
+post_hook = "kvantummanager --set MatugenDark 2>/dev/null || true"

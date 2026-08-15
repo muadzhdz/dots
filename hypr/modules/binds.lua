@@ -37,12 +37,12 @@ hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd(displayMenu))
 hl.bind(mainMod .. " + ALT + E",     hl.dsp.exec_cmd(emojiPicker))
 hl.bind(mainMod .. " + W",           hl.dsp.exec_cmd(wallpaper .. " random"))
 hl.bind(mainMod .. " + SHIFT + W",   hl.dsp.exec_cmd("pkill rofi; rofi -modi \"wallpaper:" .. wallpaperPicker .. "\" -show wallpaper"))
-hl.bind(mainMod .. " + ALT + W",         hl.dsp.exec_cmd("bash " .. scriptsDir .. "/waybar-position.sh cycle"), { description = "Cycle Waybar Position" })
-hl.bind(mainMod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/waybar-position.sh menu"),  { description = "Waybar Position Menu" })
 
 hl.bind(mainMod .. " + V",
     hl.dsp.exec_cmd("pkill rofi; rofi -modi \"clipboard:" .. clipRofi .. "\" -show clipboard"),
     { description = "Clipboard History" })
+hl.bind(mainMod .. " + ALT + W",         hl.dsp.exec_cmd("bash " .. scriptsDir .. "/waybar-position.sh cycle"), { description = "Cycle Waybar Position" })
+hl.bind(mainMod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/waybar-position.sh menu"),  { description = "Waybar Position Menu" })
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(scriptsDir .. "/webapp-installer.sh"), { description = "Web Apps Manager" })
 hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd(scriptsDir .. "/default-browser.sh"),    { description = "Default Browser Switcher" })
 

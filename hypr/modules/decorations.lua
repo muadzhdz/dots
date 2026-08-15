@@ -30,8 +30,8 @@ hl.config({
         rounding_power = 2,
 
         -- Change transparency of focused and unfocused windows
-        active_opacity   = 0.75,
-        inactive_opacity = 0.75,
+        active_opacity   = 0.65,
+        inactive_opacity = 0.65,
 
         -- Dim/backdrop the main workspace when a special workspace is open
         dim_special = 0.35,

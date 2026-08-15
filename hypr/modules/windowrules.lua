@@ -66,3 +66,26 @@ hl.layer_rule({
     blur = true,
     ignore_alpha = 0.3,
 })
+
+-- Polkit KDE agent — float + sedikit transparan supaya blur global kelihatan
+hl.window_rule({
+    name  = "polkit-kde-float",
+    match = { class = "org.kde.polkit-kde-authentication-agent-1" },
+    float   = true,
+    opacity = "0.92 override 0.92 override",
+})
+
+-- XDG portal / screenshot selector
+hl.window_rule({
+    name  = "xdg-portal-float",
+    match = { class = "xdg-desktop-portal-gtk" },
+    float   = true,
+    opacity = "0.92 override 0.92 override",
+})
+
+-- Semua floating window dapat opacity sedikit transparan (blur global sudah aktif di decorations)
+hl.window_rule({
+    name    = "float-opacity",
+    match   = { float = true },
+    opacity = "0.92 override 0.92 override",
+})

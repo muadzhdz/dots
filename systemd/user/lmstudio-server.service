@@ -1,0 +1,14 @@
+[Unit]
+Description=LM Studio local inference server
+Documentation=https://lmstudio.ai/docs/developer
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/home/muadzhdz/.lmstudio/bin/lms server start --port 1234
+ExecStartPost=-/home/muadzhdz/.lmstudio/bin/lms load prism-ml/bonsai-27b --context-length 32768 --gpu off -y
+ExecStop=/home/muadzhdz/.lmstudio/bin/lms server stop
+
+[Install]
+WantedBy=default.target
