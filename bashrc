@@ -14,3 +14,12 @@ alias lta='eza --tree --level=2 --all --icons=auto'
 
 alias grep='grep --color=auto'
 PS1='\w ❯ '
+
+# Report cwd to the terminal (OSC 7, format kitty) so new kitty tabs/windows
+# (ctrl+shift+t / ctrl+shift+n) open in the current directory.
+function _osc7 {
+    if [[ $TERM = *xterm* || $TERM = *kitty* || $TERM = *ghostty* ]]; then
+        printf '\e]7;kitty-shell-cwd://%s%s\a' "${HOSTNAME:-}" "$(pwd)"
+    fi
+}
+PROMPT_COMMAND="_osc7${PROMPT_COMMAND:+;$PROMPT_COMMAND}"

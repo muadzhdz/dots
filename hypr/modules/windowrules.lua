@@ -39,6 +39,19 @@ hl.window_rule({
     size  = {875, 600},
 })
 
+-- Semua window non-fullscreen tidak boleh nahan idle (idle inhibitor),
+-- biar hypridle lock/screen-off selalu jalan tepat waktu apa pun aplikasinya.
+-- Window fullscreen (mis. video fullscreen) tetap bisa nahan idle.
+-- https://issues.chromium.org/issues/386887875
+hl.window_rule({
+    name  = "ignore-idle-inhibit",
+    match = {
+        class      = ".*",
+        fullscreen = false,
+    },
+    idle_inhibit = "none",
+})
+
 hl.layer_rule({
     name  = "waybar-blur",
     match = { namespace = "waybar" },
@@ -55,7 +68,7 @@ hl.layer_rule({
 
 hl.layer_rule({
     name  = "mako-blur",
-    match = { namespace = "mako" },
+    match = { namespace = "notifications" },
     blur = true,
     ignore_alpha = 0.3,
 })
