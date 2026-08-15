@@ -19,7 +19,7 @@ if [ -n "$RECENT" ]; then
     LOCKED_BY="download browser: $(basename "$RECENT")"
 fi
 
-# 3. Proses CLI aktif (download tool & AI agent)
+# 3. Proses CLI aktif (download tool, AI agent, package manager)
 ACTIVE_PROCS=(
     "wget"
     "curl"
@@ -30,6 +30,10 @@ ACTIVE_PROCS=(
     "agy"
     "codex"
     "hermes"
+    "pacman"
+    "yay"
+    "paru"
+    "nix"
 )
 for proc in "${ACTIVE_PROCS[@]}"; do
     if pgrep -f "$proc" >/dev/null 2>&1; then
@@ -37,6 +41,11 @@ for proc in "${ACTIVE_PROCS[@]}"; do
         break
     fi
 done
+
+# 4. Python HTTP server aktif
+if pgrep -f "python.*http\.server" >/dev/null 2>&1; then
+    LOCKED_BY="proses: python -m http.server"
+fi
 
 if [ -n "$LOCKED_BY" ]; then
     notify-send -a "hypridle" "Suspend dilewati" "Ada aktivitas: $LOCKED_BY" 2>/dev/null
