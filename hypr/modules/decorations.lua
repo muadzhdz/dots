@@ -6,6 +6,13 @@
 
 pcall(dofile, os.getenv("HOME") .. "/.config/matugen/generated/hyprland-border-colors.lua")
 
+local border_mode_file = io.open(os.getenv("HOME") .. "/.config/scripts/.border-mode", "r")
+local no_border = false
+if border_mode_file then
+    no_border = border_mode_file:read("*l") == "noborder"
+    border_mode_file:close()
+end
+
 hl.config({
     general = {
         gaps_in  = 10,
@@ -26,7 +33,7 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 10,
+        rounding       = no_border and 0 or 10,
         rounding_power = 2,
 
         -- Change transparency of focused and unfocused windows

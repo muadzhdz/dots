@@ -35,6 +35,12 @@ def update_waybar_config(filepath, pos):
 
     content = re.sub(r'\"position\":\s*\"[^\"]+\"', f'\"position\": \"{pos}\"', content)
 
+    no_border = False
+    marker = os.path.expanduser('~/.config/scripts/.border-mode')
+    if os.path.exists(marker):
+        with open(marker, 'r') as mf:
+            no_border = mf.read().strip() == 'noborder'
+
     if pos in ('left', 'right'):
         content = re.sub(r'\"height\":\s*\d+', '\"height\": 1000', content)
         content = re.sub(r'\"width\":\s*\d+', '\"width\": 37', content)
@@ -42,7 +48,13 @@ def update_waybar_config(filepath, pos):
             content = re.sub(r'(\"clock\":\s*\{)', r'\1\n    \"rotate\": 270,', content)
     else:
         content = re.sub(r'\"height\":\s*\d+', '\"height\": 37', content)
-        content = re.sub(r'\"width\":\s*\d+', '\"width\": 1000', content)
+        if no_border:
+            content = re.sub(r'\"width\":\s*\d+\s*,?\n', '', content)
+        else:
+            if not re.search(r'\"width\"', content):
+                content = re.sub(r'(\"height\":\s*\d+\s*,?)', r'\1\n    \"width\": 1000', content)
+            else:
+                content = re.sub(r'\"width\":\s*\d+', '\"width\": 1000', content)
         content = re.sub(r'\"rotate\":\s*270,\s*', '', content)
 
     with open(filepath, 'w', encoding='utf-8') as f:

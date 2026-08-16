@@ -4,8 +4,8 @@
   "position": "top",
   "spacing": 0,
   "height": 37,
-  "width": 1000,
-  "modules-left": ["custom/arch", "hyprland/workspaces"],
+    "width": 1000
+    "modules-left": ["custom/arch", "hyprland/workspaces"],
   "modules-center": ["clock"],
   "modules-right": [
     "tray",

@@ -45,6 +45,8 @@ hl.bind(mainMod .. " + ALT + W",         hl.dsp.exec_cmd("bash " .. scriptsDir .
 hl.bind(mainMod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/waybar-position.sh menu"),  { description = "Waybar Position Menu" })
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(scriptsDir .. "/webapp-installer.sh"), { description = "Web Apps Manager" })
 hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd(scriptsDir .. "/default-browser.sh"),    { description = "Default Browser Switcher" })
+hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("gtk-launch \"$(xdg-settings get default-web-browser 2>/dev/null || echo firefox.desktop)\""), { description = "Default Browser" })
+hl.bind(mainMod .. " + CTRL + B",  hl.dsp.exec_cmd("bash " .. scriptsDir .. "/border-mode.sh menu"), { description = "Border Mode" })
 
 hl.bind("Print",                 hl.dsp.exec_cmd(screenshot))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd(screenshot))
