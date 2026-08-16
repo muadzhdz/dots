@@ -95,7 +95,18 @@ What changes on each position:
 - **Rofi** — keeps its directional entrance: when the waybar is on the left, rofi slides in from the right, and vice versa (per-layer rule, so mako/swayosd are unaffected)
 - **Bar transition** — switching positions kills the old bar (it fades out via `layersOut` = fade) and the new bar slides in from its own edge (`layersIn` = slide), so there's no cross-screen travel
 
-The waybar background is `alpha(@surface-container, 0.75)` from the matugen palette, so it recolors with every wallpaper change (template: `matugen/templates/waybar.css`, applied via `post_hook = "pkill -SIGUSR2 waybar"`).
+The waybar background is `alpha(@surface-container, 0.75)` from the matugen palette, so it recolors with every wallpaper change (template: `matugen/templates/waybar.css`, recoloring is handled by `wallpaper.sh`, which restarts the bar through `scripts/waybar-hide.sh apply`).
+
+## Waybar hide/show
+
+`scripts/waybar-hide.sh {toggle|hide|show|apply}` — `SUPER+SHIFT+SPACE` toggles:
+
+- **hide** — writes `~/.config/waybar/.hidden` and sends `SIGUSR1` (mapped to `"hide"` in the waybar config; an idempotent *set*, so no state drift). The bar process stays alive.
+- **show** — removes the marker and restarts the bar (`waybar &`), which comes up visible.
+- **apply** — restarts the bar **only if it isn't hidden** (restart points: wallpaper change, border mode, bar position). A hidden bar is never restarted, so it can never pop back up.
+- Wallpaper changes skip the waybar restart entirely while hidden — the new matugen style is picked up on the next `show`.
+
+`matugen` has **no** waybar post_hook (a `SIGUSR2` reload would unhide the bar); recoloring is done by `wallpaper.sh` only.
 
 ## SDDM
 

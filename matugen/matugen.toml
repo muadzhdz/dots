@@ -8,7 +8,9 @@ output_path = "generated/rofi-colors.rasi"
 [templates.waybar]
 input_path = "templates/waybar.css"
 output_path = "generated/waybar.css"
-post_hook = "pkill -SIGUSR2 waybar || true"
+# No post_hook: restarting/recoloring waybar is handled by wallpaper.sh
+# via `waybar-hide.sh apply` (SIGUSR2 would reload an hidden bar into view).
+post_hook = ""
 
 [templates.kitty]
 input_path = "templates/kitty-colors.conf"

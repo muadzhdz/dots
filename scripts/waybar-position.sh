@@ -94,18 +94,11 @@ update_waybar_config('$DOTS_CONFIG_FILE', '$target_pos')
         hyprctl eval 'hl.layer_rule({ name = "rofi-anim", match = { namespace = "rofi" }, animation = "slide" })' >/dev/null 2>&1 || true
     fi
 
-    # Layers: bars enter from their own edge (no cross-screen travel), old bar fades out
-    hyprctl eval 'hl.animation({ leaf = "layers", enabled = true, speed = 3.81, bezier = "easeOutQuint", style = "slide" })' >/dev/null 2>&1 || true
-    hyprctl eval 'hl.animation({ leaf = "layersIn", enabled = true, speed = 4, bezier = "easeOutQuint", style = "slide" })' >/dev/null 2>&1 || true
-    # layersOut: old bar hides with a fade before the new one enters
-    hyprctl eval 'hl.animation({ leaf = "layersOut", enabled = true, speed = 1.5, bezier = "linear", style = "fade" })' >/dev/null 2>&1 || true
+    # Layer animations are disabled (decorations.lua) so the bar never
+    # flickers when it is reloaded or moved.
 
-    # Restart Waybar cleanly: let the old bar hide (layersOut fade) before the new one enters
-    if pkill -x waybar 2>/dev/null; then
-        while pgrep -x waybar >/dev/null 2>&1; do sleep 0.02; done
-        sleep 0.8
-    fi
-    waybar >/dev/null 2>&1 &
+    # Reload the bar in place (new position/style) — unless it is hidden,
+    # in which case it stays hidden and picks up the change on next show.
     bash "$HOME/.config/scripts/waybar-hide.sh" apply
 }
 

@@ -14,37 +14,12 @@ ensure_daemon() {
     fi
 }
 
-waybar_hidden() {
-    [[ -f "$HOME/.config/waybar/.hidden" ]]
-}
-
-hide_waybar() {
-    pkill -SIGUSR1 waybar 2>/dev/null || true
-}
-
-restart_waybar() {
-    if pkill -x waybar 2>/dev/null; then
-        while pgrep -x waybar >/dev/null 2>&1; do sleep 0.02; done
-        sleep 0.8
-    fi
-    waybar >/dev/null 2>&1 &
-    bash "$HOME/.config/scripts/waybar-hide.sh" apply
-}
-
 set_wallpaper() {
     local img="$1"
 
     if [[ ! -f "$img" ]]; then
         echo "Image not found: $img"
         exit 1
-    fi
-
-    local waybar_was_hidden=false
-    if waybar_hidden; then
-        waybar_was_hidden=true
-    else
-        hide_waybar
-        sleep 0.75
     fi
 
     awww img \
@@ -57,10 +32,9 @@ set_wallpaper() {
 
     matugen image "$img" -q --config "$HOME/.config/matugen/matugen.toml" --prefer darkness >/dev/null 2>&1 || true
 
-    # Restart waybar so it picks up the new matugen style.
-    # With "start_hidden": true the bar comes back hidden without any flash;
-    # "apply" shows it again when the marker says so.
-    restart_waybar
+    # Waybar is never touched here — it stays completely still while the
+    # wallpaper changes (no reload, no recolor). The new matugen waybar.css
+    # is picked up the next time the bar is (re)started via waybar-hide.sh.
 }
 
 cmd_init() {
