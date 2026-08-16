@@ -104,6 +104,20 @@ cmd_phase() {
     grep -v "xorriso : UPDATE\|libisofs : NOTE" "$log" | tail -20
 }
 
+cmd_live() {
+    local interval="${1:-10}"
+    [[ "$interval" =~ ^[0-9]+$ ]] || interval=10
+    local log
+    log=$(find_log) || { echo "belum ada log build"; exit 1; }
+    while true; do
+        clear
+        cmd_status
+        echo ""
+        echo "  (live mode — refresh tiap ${interval}s | Ctrl+C untuk keluar)"
+        sleep "$interval"
+    done
+}
+
 cmd_log() {
     local log
     log=$(find_log) || { echo "belum ada log build"; exit 1; }
@@ -114,6 +128,7 @@ cmd_help() {
     echo "Usage: rice-status.sh [command]"
     echo "  status (default) - ringkasan lengkap"
     echo "  tail             - ikuti log build secara live (tail -f)"
+    echo "  live [detik]     - status auto-refresh (default 10 detik)"
     echo "  phase            - 20 baris terakhir fase build"
     echo "  log              - path log aktif"
     echo ""
@@ -125,6 +140,7 @@ mkdir -p "$LOG_DIR"
 case "${1-status}" in
     status) cmd_status ;;
     tail)   cmd_tail ;;
+    live)   cmd_live "$2" ;;
     phase)  cmd_phase ;;
     log)    cmd_log ;;
     help|-h) cmd_help ;;
