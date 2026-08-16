@@ -2,7 +2,7 @@
 
 
 [[ -f ~/.config/user-dirs.dirs ]] && source ~/.config/user-dirs.dirs
-OUTPUT_DIR="${OMARCHY_SCREENSHOT_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}}"
+OUTPUT_DIR="${RICE_SCREENSHOT_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}}"
 
 if [[ ! -d $OUTPUT_DIR ]]; then
   mkdir -p "$OUTPUT_DIR"
@@ -11,7 +11,7 @@ fi
 
 pkill slurp && exit 0
 
-SCREENSHOT_EDITOR="${OMARCHY_SCREENSHOT_EDITOR:-satty}"
+SCREENSHOT_EDITOR="${RICE_SCREENSHOT_EDITOR:-satty}"
 
 # Parse --editor flag from any position
 ARGS=()

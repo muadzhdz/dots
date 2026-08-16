@@ -12,7 +12,7 @@ SELECTION=$(slurp 2>/dev/null)
 
 [[ -z $SELECTION ]] && exit 0
 
-TEXT=$(grim -g "$SELECTION" - | tesseract stdin stdout --oem 1 --psm 6 -l "${OMARCHY_OCR_LANGS:-eng}" --dpi 300 -c preserve_interword_spaces=1 2>/dev/null) || exit 1
+TEXT=$(grim -g "$SELECTION" - | tesseract stdin stdout --oem 1 --psm 6 -l "${RICE_OCR_LANGS:-eng}" --dpi 300 -c preserve_interword_spaces=1 2>/dev/null) || exit 1
 
 [[ -z $TEXT ]] && exit 1
 

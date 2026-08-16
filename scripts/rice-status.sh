@@ -4,7 +4,7 @@
 
 BUILD_DIR="$HOME/rice-iso"
 LOG_DIR="$BUILD_DIR/build-logs"
-CACHE_DIR="$HOME/.cache/omarchy/iso_edge/airootfs/var/cache/omarchy"
+CACHE_DIR="$HOME/.cache/rice/iso_edge/airootfs/var/cache/rice"
 OFFLINE_DIR="$CACHE_DIR/mirror/offline"
 MODEL_DIR="$CACHE_DIR/models"
 RELEASE_DIR="$BUILD_DIR/release"
@@ -24,7 +24,7 @@ is_building() {
     if docker ps 2>/dev/null | grep -q "archlinux"; then
         return 0
     fi
-    if pgrep -f "omarchy-iso-make" >/dev/null 2>&1; then
+    if pgrep -f "rice-iso-make" >/dev/null 2>&1; then
         return 0
     fi
     return 1

@@ -1,6 +1,6 @@
 # dots
 
-Personal Hyprland dotfiles based on [Omarchy](https://github.com/basecamp/omarchy) & [Dusky](https://github.com/dusklinux/dusky), with full Material You theming via [matugen](https://github.com/InioX/matugen).
+Personal Hyprland dotfiles based on [Rice](https://github.com/basecamp/rice) & [Dusky](https://github.com/dusklinux/dusky), with full Material You theming via [matugen](https://github.com/InioX/matugen).
 
 Every component (waybar, kitty, rofi, mako, swayosd, btop, cava, ghostty, GTK, browser themes) recolors itself automatically on every wallpaper change. Config uses the **Lua API** (requires Hyprland >= 0.55).
 
@@ -117,7 +117,7 @@ The waybar background is `alpha(@surface-container, 0.75)` from the matugen pale
 
 ## Credits
 
-- [Omarchy](https://github.com/basecamp/omarchy) by DHH (MIT)
+- [Rice](https://github.com/basecamp/rice) by DHH (MIT)
 - [Dusky](https://github.com/dusklinux/dusky) by dusklinux (MIT)
 - [MatugenFox](https://github.com/Ubaidullah-Web-Dev/MatugenFox) — browser theming
 
