@@ -52,7 +52,7 @@ def update_waybar_config(filepath, pos):
             content = re.sub(r'\"width\":\s*\d+\s*,?\n', '', content)
         else:
             if not re.search(r'\"width\"', content):
-                content = re.sub(r'(\"height\":\s*\d+\s*,?)', r'\1\n    \"width\": 1000', content)
+                content = re.sub(r'(\"height\":\s*\d+)\s*,?', r'\1,\n    \"width\": 1000,', content)
             else:
                 content = re.sub(r'\"width\":\s*\d+', '\"width\": 1000', content)
         content = re.sub(r'\"rotate\":\s*270,\s*', '', content)

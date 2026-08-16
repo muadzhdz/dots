@@ -57,8 +57,9 @@ set_wallpaper() {
 
     matugen image "$img" -q --config "$HOME/.config/matugen/matugen.toml" --prefer darkness >/dev/null 2>&1 || true
 
-    # Clean waybar restart so it picks up the new matugen style.
-    # "apply" re-hides it when the marker says so — a hidden waybar stays hidden.
+    # Restart waybar so it picks up the new matugen style.
+    # With "start_hidden": true the bar comes back hidden without any flash;
+    # "apply" shows it again when the marker says so.
     restart_waybar
 }
 

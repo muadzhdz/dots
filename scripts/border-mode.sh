@@ -28,7 +28,7 @@ if '$mode' == 'noborder':
     content = re.sub(r'\"width\":\s*\d+\s*,?\n', '', content)
 else:
     if not re.search(r'\"width\"', content):
-        content = re.sub(r'(\"height\":\s*\d+\s*,?)', r'\1\n    \"width\": 1000', content)
+        content = re.sub(r'(\"height\":\s*\d+)\s*,?', r'\1,\n    \"width\": 1000,', content)
 
 with open(path, 'w', encoding='utf-8') as f:
     f.write(content)
