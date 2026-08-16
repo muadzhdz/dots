@@ -24,6 +24,13 @@ set_position() {
         *) echo "Invalid position: $target_pos"; exit 1 ;;
     esac
 
+    local mon_h
+    mon_h=$(hyprctl monitors -j 2>/dev/null | python3 -c "import json,sys
+try:
+    print(json.load(sys.stdin)[0]['height'])
+except Exception:
+    print(1080)")
+
     python3 -c "
 import re, os
 
@@ -42,8 +49,15 @@ def update_waybar_config(filepath, pos):
             no_border = mf.read().strip() == 'noborder'
 
     if pos in ('left', 'right'):
-        content = re.sub(r'\"height\":\s*\d+', '\"height\": 1000', content)
-        content = re.sub(r'\"width\":\s*\d+', '\"width\": 37', content)
+        # Vertical bar: height mirrors the horizontal width (1000 centered in
+        # border mode, full monitor height in no-border mode); the 37px width
+        # is mandatory regardless of border mode.
+        bar_h = $mon_h if no_border else 1000
+        content = re.sub(r'\"height\":\s*\d+', f'\"height\": {bar_h}', content)
+        if '\"width\"' not in content:
+            content = re.sub(r'(\"height\":\s*\d+)\s*,?', r'\1,\n    \"width\": 37,', content)
+        else:
+            content = re.sub(r'\"width\":\s*\d+', '\"width\": 37', content)
         if '\"rotate\": 270' not in content:
             content = re.sub(r'(\"clock\":\s*\{)', r'\1\n    \"rotate\": 270,', content)
     else:

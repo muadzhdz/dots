@@ -17,18 +17,43 @@ notify() {
 
 apply_waybar_width() {
     local mode="$1"
+    local mon_h
+    mon_h=$(hyprctl monitors -j 2>/dev/null | python3 -c "import json,sys
+try:
+    print(json.load(sys.stdin)[0]['height'])
+except Exception:
+    print(1080)")
     python3 -c "
 import re, os
 
 path = os.path.expanduser('~/.config/waybar/config.jsonc')
+pos_path = os.path.expanduser('~/.config/waybar/.current_position')
 with open(path, 'r', encoding='utf-8') as f:
     content = f.read()
 
-if '$mode' == 'noborder':
+pos = 'top'
+if os.path.exists(pos_path):
+    with open(pos_path, 'r') as pf:
+        pos = pf.read().strip() or 'top'
+
+if pos in ('left', 'right'):
+    # Vertical bar: 37px width mandatory; height mirrors the horizontal bar
+    # (1000 centered in border mode, full monitor height in no-border mode).
+    if '\"width\"' not in content:
+        content = re.sub(r'(\"height\":\s*\d+)\s*,?', r'\1,\n    \"width\": 37,', content)
+    else:
+        content = re.sub(r'\"width\":\s*\d+', '\"width\": 37', content)
+    bar_h = $mon_h if '$mode' == 'noborder' else 1000
+    content = re.sub(r'\"height\":\s*\d+', f'\"height\": {bar_h}', content)
+elif '$mode' == 'noborder':
+    # Horizontal full-width bar: no width key at all.
     content = re.sub(r'\"width\":\s*\d+\s*,?\n', '', content)
 else:
+    # Horizontal centered bar (border mode).
     if not re.search(r'\"width\"', content):
         content = re.sub(r'(\"height\":\s*\d+)\s*,?', r'\1,\n    \"width\": 1000,', content)
+    else:
+        content = re.sub(r'\"width\":\s*\d+', '\"width\": 1000', content)
 
 with open(path, 'w', encoding='utf-8') as f:
     f.write(content)
