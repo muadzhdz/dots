@@ -53,7 +53,7 @@ OFFICIAL_PKGS=(
 
 AUR_PKGS=(
     sddm-silent-theme
-    ttf-material-symbols-variable-git
+    material-symbols-git
     redhat-fonts
     zen-browser-bin
     helium-browser-bin
