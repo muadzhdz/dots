@@ -55,6 +55,7 @@ apply_noborder() {
     cp "$DIR/mako.conf.noborder" "$HOME/.config/mako/config"
     cp "$DIR/waybar.style.noborder" "$HOME/.config/waybar/style.css"
     cp "$DIR/swayosd.style.noborder" "$HOME/.config/swayosd/style.css"
+    cp "$DIR/rofi.config.noborder" "$HOME/.config/rofi/config.rasi"
     apply_waybar_width noborder
     echo "noborder" > "$MARKER"
 }
@@ -64,6 +65,7 @@ apply_border() {
     cp "$DOTS/mako/config" "$HOME/.config/mako/config"
     cp "$DOTS/waybar/style.css" "$HOME/.config/waybar/style.css"
     cp "$DOTS/swayosd/style.css" "$HOME/.config/swayosd/style.css"
+    cp "$DOTS/rofi/config.rasi" "$HOME/.config/rofi/config.rasi"
     apply_waybar_width border
     echo "border" > "$MARKER"
 }
