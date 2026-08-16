@@ -106,6 +106,7 @@ update_waybar_config('$DOTS_CONFIG_FILE', '$target_pos')
         sleep 0.8
     fi
     waybar >/dev/null 2>&1 &
+    bash "$HOME/.config/scripts/waybar-hide.sh" apply
 }
 
 cmd_cycle() {

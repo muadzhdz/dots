@@ -7,19 +7,19 @@ window#waybar {
 
 /* Position-aware rounded corners */
 window#waybar.top {
-  border-radius: 0 0 0 0;
+  border-radius: 0;
 }
 
 window#waybar.bottom {
-  border-radius: 0 0 0 0;
+  border-radius: 0;
 }
 
 window#waybar.left {
-  border-radius: 0 0 0 0;
+  border-radius: 0;
 }
 
 window#waybar.right {
-  border-radius: 0 0 0 0;
+  border-radius: 0;
 }
 
 * {
@@ -38,12 +38,12 @@ window#waybar.bottom * {
 
 window#waybar.top .modules-left,
 window#waybar.bottom .modules-left {
-  margin-left: 0;
+  margin-left: 20px;
 }
 
 window#waybar.top .modules-right,
 window#waybar.bottom .modules-right {
-  margin-right: 0;
+  margin-right: 20px;
 }
 
 /* Vertical Layout (Left & Right) */
@@ -55,14 +55,14 @@ window#waybar.right * {
 
 window#waybar.left .modules-left,
 window#waybar.right .modules-left {
-  margin-top: 0;
+  margin-top: 20px;
   margin-left: 0;
   margin-right: 0;
 }
 
 window#waybar.left .modules-right,
 window#waybar.right .modules-right {
-  margin-bottom: 0;
+  margin-bottom: 20px;
   margin-left: 0;
   margin-right: 0;
 }

@@ -14,12 +14,21 @@ ensure_daemon() {
     fi
 }
 
-waybar_visible() {
-    hyprctl clients -j 2>/dev/null | jq -e '.[] | select(.class == "waybar") | select(.mapped == true)' >/dev/null 2>&1
+waybar_hidden() {
+    [[ -f "$HOME/.config/waybar/.hidden" ]]
 }
 
 hide_waybar() {
     pkill -SIGUSR1 waybar 2>/dev/null || true
+}
+
+restart_waybar() {
+    if pkill -x waybar 2>/dev/null; then
+        while pgrep -x waybar >/dev/null 2>&1; do sleep 0.02; done
+        sleep 0.8
+    fi
+    waybar >/dev/null 2>&1 &
+    bash "$HOME/.config/scripts/waybar-hide.sh" apply
 }
 
 set_wallpaper() {
@@ -30,9 +39,10 @@ set_wallpaper() {
         exit 1
     fi
 
-    local waybar_was_visible=false
-    if waybar_visible; then
-        waybar_was_visible=true
+    local waybar_was_hidden=false
+    if waybar_hidden; then
+        waybar_was_hidden=true
+    else
         hide_waybar
         sleep 0.75
     fi
@@ -47,10 +57,9 @@ set_wallpaper() {
 
     matugen image "$img" -q --config "$HOME/.config/matugen/matugen.toml" --prefer darkness >/dev/null 2>&1 || true
 
-    if $waybar_was_visible; then
-        sleep 0.3
-        hide_waybar
-    fi
+    # Clean waybar restart so it picks up the new matugen style.
+    # "apply" re-hides it when the marker says so — a hidden waybar stays hidden.
+    restart_waybar
 }
 
 cmd_init() {

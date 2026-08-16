@@ -41,6 +41,7 @@ restart_waybar() {
         sleep 0.8
     fi
     waybar >/dev/null 2>&1 &
+    bash "$HOME/.config/scripts/waybar-hide.sh" apply
 }
 
 restart_mako() {
