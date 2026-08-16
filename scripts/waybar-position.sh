@@ -1,12 +1,23 @@
 #!/usr/bin/env bash
 
 # Waybar Position & Hyprland Workspace Animation Switcher
-# Top/Bottom -> Workspaces animation = "slide" (horizontal)
-# Left/Right -> Workspaces animation = "slidevert" (vertical)
+# Top/Bottom -> Workspaces animation = "slide" (horizontal), swipe horizontal
+# Left/Right -> Workspaces animation = "slidevert" (vertical), swipe vertical
+#
+# The special workspace (scratchpad) slides in from the side OPPOSITE the
+# waybar, so it always enters moving toward the bar (explicit direction
+# suffixes — -50% percentage is unreliable for horizontal special slides):
+#   right  -> slide left  (from left, kiri -> kanan)
+#   left   -> slide right (from right, kanan -> kiri)
+#   bottom -> slidevert top (from top, atas -> bawah)
+#   top    -> slidevert bottom (from bottom, bawah -> atas)
 
 CACHE_FILE="$HOME/.config/waybar/.current_position"
 CONFIG_FILE="$HOME/.config/waybar/config.jsonc"
 DOTS_CONFIG_FILE="$HOME/dots/waybar/config.jsonc"
+
+DOTS_HYPR="$HOME/dots/hypr/modules"
+LIVE_HYPR="$HOME/.config/hypr/modules"
 
 get_current_pos() {
     if [[ -f "$CACHE_FILE" ]]; then
@@ -14,6 +25,100 @@ get_current_pos() {
     else
         echo "top"
     fi
+}
+
+set_hypr_animations() {
+    local target_pos="$1"
+    local ws_style special_style special_out_style gesture_dir rofi_style
+
+    case "$target_pos" in
+        left|right) ws_style="slidevert" ;;
+        *)          ws_style="slide" ;;
+    esac
+
+    case "$target_pos" in
+        right)  special_style="slide left" ;;
+        left)   special_style="slide right" ;;
+        bottom) special_style="slidevert top" ;;
+        top)    special_style="slidevert bottom" ;;
+    esac
+
+    # Keluar ke arah asal masuk (suffix OUT = arah gerak keluar, kebalikan In)
+    case "$target_pos" in
+        right)  special_out_style="slide right" ;;
+        left)   special_out_style="slide left" ;;
+        bottom) special_out_style="slidevert bottom" ;;
+        top)    special_out_style="slidevert top" ;;
+    esac
+
+    # Rofi mengikuti posisi waybar (kiri -> dari kanan, kanan -> dari kiri)
+    case "$target_pos" in
+        right)  rofi_style="slide left" ;;
+        left)   rofi_style="slide right" ;;
+        *)      rofi_style="slide" ;;
+    esac
+
+    case "$target_pos" in
+        left|right) gesture_dir="vertical" ;;
+        *)          gesture_dir="horizontal" ;;
+    esac
+
+    python3 - "$ws_style" "$special_style" "$special_out_style" "$rofi_style" "$gesture_dir" <<'PY'
+import re, os, sys
+
+ws_style, special_style, special_out_style, rofi_style, gesture_dir = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
+
+for base in (os.path.expanduser('~/dots/hypr/modules'), os.path.expanduser('~/.config/hypr/modules')):
+    deco = os.path.join(base, 'decorations.lua')
+    if os.path.exists(deco):
+        with open(deco, encoding='utf-8') as f:
+            content = f.read()
+        content = re.sub(r'(leaf = "workspaces"[^\n]*?style = ")[^"]*"',
+                         r'\g<1>' + ws_style + '"', content)
+        content = re.sub(r'(leaf = "specialWorkspace",[^\n]*?style = ")[^"]*"',
+                         r'\g<1>' + special_style + '"', content)
+        if 'leaf = "specialWorkspaceOut"' not in content:
+            anchor = 'leaf = "specialWorkspace",'
+            idx = content.find(anchor)
+            if idx != -1:
+                nl = content.find('\n', idx)
+                insert = '\nhl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 4, bezier = "easeOutQuint", style = "' + special_out_style + '" })'
+                content = content[:nl + 1] + insert + content[nl + 1:]
+        else:
+            content = re.sub(r'(leaf = "specialWorkspaceOut"[^\n]*?style = ")[^"]*"',
+                             r'\g<1>' + special_out_style + '"', content)
+        with open(deco, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+    wr = os.path.join(base, 'windowrules.lua')
+    if os.path.exists(wr):
+        with open(wr, encoding='utf-8') as f:
+            content = f.read()
+        if 'rofi-anim' in content:
+            content = re.sub(r'(name\s*=\s*"rofi-anim"[\s\S]*?animation\s*=\s*")[^"]*(")',
+                             r'\g<1>' + rofi_style + r'\g<2>', content)
+        else:
+            block = ('\n-- Rofi layer (wayland backend: di-spawn tanpa DISPLAY di launcher.py) -- arah ikut posisi waybar\n'
+                     'hl.layer_rule({\n'
+                     '    name      = "rofi-anim",\n'
+                     '    match     = { namespace = "rofi" },\n'
+                     '    animation = "' + rofi_style + '",\n'
+                     '})\n')
+            content += block
+        with open(wr, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+    inp = os.path.join(base, 'input.lua')
+    if os.path.exists(inp):
+        with open(inp, encoding='utf-8') as f:
+            content = f.read()
+        content = re.sub(r'(direction = ")[^"]*"',
+                         r'\g<1>' + gesture_dir + '"', content)
+        with open(inp, 'w', encoding='utf-8') as f:
+            f.write(content)
+PY
+
+    hyprctl reload >/dev/null 2>&1 || true
 }
 
 set_position() {
@@ -80,36 +185,9 @@ update_waybar_config('$DOTS_CONFIG_FILE', '$target_pos')
 
     echo "$target_pos" > "$CACHE_FILE"
 
-    # Clear any existing 3-finger swipe gesture first to avoid duplicates/shadowing
-    hyprctl eval 'hl.gesture({ fingers = 3, direction = "horizontal", action = "unset" })' >/dev/null 2>&1 || true
-    hyprctl eval 'hl.gesture({ fingers = 3, direction = "vertical", action = "unset" })' >/dev/null 2>&1 || true
-
-    if [[ "$target_pos" == "left" || "$target_pos" == "right" ]]; then
-        # 3-finger swipe gesture VERTICAL for vertical sidebar
-        hyprctl eval 'hl.gesture({ fingers = 3, direction = "vertical", action = "workspace" })' >/dev/null 2>&1 || true
-        # Regular workspace transition animation VERTICAL (slidevert)
-        hyprctl eval 'hl.animation({ leaf = "workspaces", enabled = true, speed = 4, bezier = "easeOutQuint", style = "slidevert" })' >/dev/null 2>&1 || true
-        # Special workspace animation HORIZONTAL (slide)
-        hyprctl eval 'hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4, bezier = "easeOutQuint", style = "slide" })' >/dev/null 2>&1 || true
-        # Rofi: appears from the side opposite the waybar (per-layer rule)
-        if [[ "$target_pos" == "left" ]]; then
-            hyprctl eval 'hl.layer_rule({ name = "rofi-anim", match = { namespace = "rofi" }, animation = "slide right" })' >/dev/null 2>&1 || true
-        else
-            hyprctl eval 'hl.layer_rule({ name = "rofi-anim", match = { namespace = "rofi" }, animation = "slide left" })' >/dev/null 2>&1 || true
-        fi
-    else
-        # 3-finger swipe gesture HORIZONTAL for horizontal bar
-        hyprctl eval 'hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })' >/dev/null 2>&1 || true
-        # Regular workspace transition animation HORIZONTAL (slide)
-        hyprctl eval 'hl.animation({ leaf = "workspaces", enabled = true, speed = 4, bezier = "easeOutQuint", style = "slide" })' >/dev/null 2>&1 || true
-        # Special workspace animation VERTICAL (slidevert)
-        hyprctl eval 'hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4, bezier = "easeOutQuint", style = "slidevert" })' >/dev/null 2>&1 || true
-        # Rofi: default horizontal slide
-        hyprctl eval 'hl.layer_rule({ name = "rofi-anim", match = { namespace = "rofi" }, animation = "slide" })' >/dev/null 2>&1 || true
-    fi
-
-    # Layer animations are disabled (decorations.lua) so the bar never
-    # flickers when it is reloaded or moved.
+    # Hyprland animations/gesture follow the bar position (file + reload,
+    # since hyprctl eval dispatch does not work reliably in this session).
+    set_hypr_animations "$target_pos"
 
     # Reload the bar in place (new position/style) — unless it is hidden,
     # in which case it stays hidden and picks up the change on next show.

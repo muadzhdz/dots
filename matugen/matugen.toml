@@ -87,7 +87,7 @@ output_path = "generated/hyprlock-colors.conf"
 
 [templates.swayosd]
 input_path = "templates/swayosd.css"
-output_path = "~/.config/swayosd/style.css"
+output_path = "generated/swayosd-colors.css"
 post_hook = "systemctl --user restart swayosd-server.service 2>/dev/null || true"
 
 [templates.sddm]
@@ -103,3 +103,8 @@ output_path = "~/.config/obs-studio/themes/matugen.obt"
 input_path = "templates/kvantum-colors.kvconfig"
 output_path = "~/.config/Kvantum/MatugenDark/MatugenDark.kvconfig"
 post_hook = "kvantummanager --set MatugenDark 2>/dev/null || true"
+
+[templates.omarchy-colors]
+input_path = "templates/omarchy-colors.toml"
+output_path = "~/.config/omarchy/current/theme/colors.toml"
+post_hook = "mkdir -p $HOME/.config/omarchy/current/theme 2>/dev/null || true"

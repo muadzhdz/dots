@@ -40,14 +40,29 @@ for d in desktop_dirs:
 sorted_app_names = sorted(apps.keys(), key=lambda s: s.lower())
 input_data = '\n'.join(sorted_app_names)
 
+# Sidebar position: "right" anchors east (slides in from the left edge),
+# "left" anchors west (slides in from the right edge), default stays centered.
+side = sys.argv[1] if len(sys.argv) > 1 else "center"
+theme_str = ""
+window_title = ""
+if side == "right":
+    theme_str = "-theme-str", "window { location: east; anchor: east; }"
+    window_title = "-window-title", "SidebarRight"
+elif side == "left":
+    theme_str = "-theme-str", "window { location: west; anchor: west; }"
+    window_title = "-window-title", "SidebarLeft"
+
 rofi_cmd = [
     'rofi', '-dmenu', '-i',
     '-p', ' Apps',
     '-matching', 'fuzzy',
     '-sort'
 ]
+if theme_str:
+    rofi_cmd += list(theme_str) + list(window_title)
 
-proc = subprocess.Popen(rofi_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+spawn_env = {k: v for k, v in os.environ.items() if k != 'DISPLAY'}
+proc = subprocess.Popen(rofi_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, env=spawn_env)
 stdout, _ = proc.communicate(input=input_data)
 
 selection = stdout.strip()

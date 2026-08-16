@@ -27,7 +27,8 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(lock), { locked = true })
-hl.bind(mainMod .. " + SPACE",       hl.dsp.exec_cmd(launcher))
+hl.bind(mainMod .. " + SPACE",       hl.dsp.exec_cmd(launcher .. " right"), { description = "App Launcher (sidebar kanan, slide dari kiri)" })
+hl.bind(mainMod .. " + CTRL + SPACE", hl.dsp.exec_cmd(launcher .. " left"),  { description = "App Launcher (sidebar kiri, slide dari kanan)" })
 hl.bind(mainMod .. " + K",           hl.dsp.exec_cmd(scriptsDir .. "/keybinds.sh"), { description = "Show Keybinds" })
 hl.bind(mainMod .. " + ALT + SPACE", hl.dsp.exec_cmd("pkill rofi; rofi -show power-menu -modi power-menu:" .. powerMenu))
 hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/waybar-hide.sh toggle"))
@@ -97,8 +98,8 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
--- Special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
+-- Special workspace (scratchpad) — animasi slide mengikuti posisi waybar
+hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"), { description = "Scratchpad (slide berlawanan arah dengan sisi waybar)" })
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Scroll through existing workspaces with mainMod + scroll

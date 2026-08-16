@@ -101,6 +101,33 @@ window#waybar.right #tray {
   margin: 0 2px;
 }
 
+#custom-voxtype {
+  padding: 0 8px;
+  margin: 0 2px;
+}
+
+window#waybar.left #custom-voxtype,
+window#waybar.right #custom-voxtype {
+  margin: 4px 0;
+  padding: 0;
+  min-width: 0;
+}
+
+#custom-voxtype.recording {
+  color: @error;
+  animation: voxtype-pulse 1s infinite;
+}
+
+#custom-voxtype.transcribing {
+  color: @secondary;
+}
+
+@keyframes voxtype-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
 #workspaces button {
   all: initial;
   padding: 0 6px;

@@ -102,3 +102,10 @@ hl.window_rule({
     match   = { float = true },
     opacity = "0.92 override 0.92 override",
 })
+
+-- Rofi layer (wayland backend: di-spawn tanpa DISPLAY di launcher.py) -- arah ikut posisi waybar
+hl.layer_rule({
+    name      = "rofi-anim",
+    match     = { namespace = "rofi" },
+    animation = "slide",
+})

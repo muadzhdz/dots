@@ -5,8 +5,8 @@
   "spacing": 0,
   "height": 37,
     "width": 1000,
-                                                "modules-left": ["custom/arch", "hyprland/workspaces"],
-  "modules-center": ["clock"],
+                                                                                                                                                                                                                                                                                        "modules-left": ["custom/arch", "hyprland/workspaces"],
+  "modules-center": ["custom/voxtype", "clock"],
   "modules-right": [
     "tray",
     "bluetooth",
@@ -112,5 +112,18 @@
     "format": "󰣇",
     "on-click": "/home/muadzhdz/.config/scripts/launcher.sh",
     "tooltip": false
+  },
+  "custom/voxtype": {
+    "exec": "voxtype status --follow --format json --icon-theme nerd-font",
+    "return-type": "json",
+    "format": "{icon}",
+    "format-icons": {
+      "idle": "",
+      "recording": "󰍬",
+      "transcribing": "󰔟"
+    },
+    "tooltip": true,
+    "on-click": "voxtype record toggle",
+    "on-click-right": "kitty --title=voxtype-config -e voxtype configure"
   }
 }

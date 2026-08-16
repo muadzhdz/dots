@@ -16,7 +16,8 @@ hl.config({
     },
 })
 
--- 3-finger swipe to switch workspaces
+-- 3-finger swipe to switch workspaces (horizontal; waybar-position.sh
+-- switches it to vertical when the waybar sits on the left/right)
 hl.gesture({
     fingers = 3,
     direction = "horizontal",

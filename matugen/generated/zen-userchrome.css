@@ -2,21 +2,21 @@
 /* Set toolkit.legacyUserProfileCustomizations.stylesheets = true in about:config */
 
 :root {
-  --matugen-surface: #101510;
-  --matugen-surface-dim: #101510;
-  --matugen-surface-container: #1c211c;
-  --matugen-surface-container-high: #262b27;
-  --matugen-on-surface: #dfe4dc;
-  --matugen-on-surface-variant: #c0c9bf;
-  --matugen-primary: #96d5a7;
-  --matugen-on-primary: #00391c;
-  --matugen-primary-container: #11512e;
-  --matugen-on-primary-container: #b1f1c1;
-  --matugen-secondary: #b6ccb9;
-  --matugen-tertiary: #a2ceda;
+  --matugen-surface: #121318;
+  --matugen-surface-dim: #121318;
+  --matugen-surface-container: #1e1f25;
+  --matugen-surface-container-high: #292a2f;
+  --matugen-on-surface: #e3e1e9;
+  --matugen-on-surface-variant: #c6c5d0;
+  --matugen-primary: #b6c4ff;
+  --matugen-on-primary: #1e2d61;
+  --matugen-primary-container: #354479;
+  --matugen-on-primary-container: #dce1ff;
+  --matugen-secondary: #c2c5dd;
+  --matugen-tertiary: #e3bada;
   --matugen-error: #ffb4ab;
-  --matugen-outline: #8b938a;
-  --matugen-surface-variant: #414942;
+  --matugen-outline: #90909a;
+  --matugen-surface-variant: #45464f;
 }
 
 /* Main toolbar area */

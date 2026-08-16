@@ -1,7 +1,5 @@
-@define-color background-color #101510;
-@define-color label #dfe4dc;
-@define-color progress #96d5a7;
-@define-color border-color #8b938a;
+@import url("../matugen/generated/swayosd-colors.css");
+
 
 window#osd {
   border-radius: 10px;
