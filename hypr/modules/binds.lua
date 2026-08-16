@@ -49,6 +49,12 @@ hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd(scriptsDir .. "/default-brows
 hl.bind("Print",                 hl.dsp.exec_cmd(screenshot))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd(screenshot))
 hl.bind(mainMod .. " + Print",     hl.dsp.exec_cmd(ocr))
+hl.bind(mainMod .. " + ALT + Print", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"), { description = "Color Picker" })
+
+-- Voxtype dictation (push-to-talk on F9, toggle with SUPER+CTRL+X)
+hl.bind("F9", hl.dsp.exec_cmd("voxtype record start"), { description = "Start dictation (push-to-talk)" })
+hl.bind("F9", hl.dsp.exec_cmd("voxtype record stop"),  { release = true, description = "Stop dictation (push-to-talk)" })
+hl.bind(mainMod .. " + CTRL + X", hl.dsp.exec_cmd("voxtype record toggle"), { description = "Toggle Dictation" })
 local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 -- closeWindowBind:set_enabled(false)
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))

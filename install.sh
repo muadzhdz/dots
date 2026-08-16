@@ -40,7 +40,7 @@ OFFICIAL_PKGS=(
     matugen swayosd awww
     hyprpicker tesseract tesseract-data-eng libnotify bc nautilus
     brightnessctl
-    wl-clipboard wireplumber pipewire-pulse
+    wl-clipboard wtype wireplumber pipewire-pulse
     ttf-jetbrains-mono-nerd noto-fonts ttf-dejavu
     adw-gtk-theme papirus-icon-theme kvantum
     obs-studio cmatrix tree chafa mpv imv
