@@ -1,9 +1,12 @@
 scripts/.current_wallpaper
+scripts/.border-mode
+scripts/__pycache__/
 rofi/.current_wallpaper
 hypr/.vscode/
 hypr/.monitor-cache
 matugen/templates/test.txt
 gtk-3.0/bookmarks
+waybar/.current_position
 obs-studio/logs/
 obs-studio/profiler_data/
 obs-studio/.sentinel/

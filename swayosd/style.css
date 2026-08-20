@@ -2,7 +2,7 @@
 
 
 window#osd {
-  border-radius: 10px;
+  border-radius: 0;
   border: none;
   background: rgba(0, 0, 0, 0.4);
 }
@@ -32,7 +32,7 @@ window#osd image:disabled {
 window#osd progressbar,
 window#osd segmentedprogress {
   min-height: 6px;
-  border-radius: 10px;
+  border-radius: 0;
   background: transparent;
   border: none;
 }
@@ -40,7 +40,7 @@ window#osd segmentedprogress {
 window#osd trough,
 window#osd segment {
   min-height: 6px;
-  border-radius: 10px;
+  border-radius: 0;
   border: none;
   background: alpha(@label, 0.5);
 }
@@ -48,7 +48,7 @@ window#osd segment {
 window#osd progress,
 window#osd segment.active {
   min-height: 6px;
-  border-radius: 10px;
+  border-radius: 0;
   border: none;
   background: @progress;
 }

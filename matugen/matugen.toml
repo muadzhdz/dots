@@ -104,7 +104,7 @@ input_path = "templates/kvantum-colors.kvconfig"
 output_path = "~/.config/Kvantum/MatugenDark/MatugenDark.kvconfig"
 post_hook = "kvantummanager --set MatugenDark 2>/dev/null || true"
 
-[templates.rice-colors]
-input_path = "templates/rice-colors.toml"
-output_path = "~/.config/rice/current/theme/colors.toml"
-post_hook = "mkdir -p $HOME/.config/rice/current/theme 2>/dev/null || true"
+[templates.omarchy-colors]
+input_path = "templates/omarchy-colors.toml"
+output_path = "~/.config/omarchy/current/theme/colors.toml"
+post_hook = "mkdir -p $HOME/.config/omarchy/current/theme 2>/dev/null || true"

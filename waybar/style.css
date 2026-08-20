@@ -7,19 +7,19 @@ window#waybar {
 
 /* Position-aware rounded corners */
 window#waybar.top {
-  border-radius: 0 0 20px 20px;
+  border-radius: 0;
 }
 
 window#waybar.bottom {
-  border-radius: 20px 20px 0 0;
+  border-radius: 0;
 }
 
 window#waybar.left {
-  border-radius: 0 20px 20px 0;
+  border-radius: 0;
 }
 
 window#waybar.right {
-  border-radius: 20px 0 0 20px;
+  border-radius: 0;
 }
 
 * {
@@ -99,33 +99,6 @@ window#waybar.right #tray {
 #custom-arch {
   padding: 0 8px;
   margin: 0 2px;
-}
-
-#custom-voxtype {
-  padding: 0 8px;
-  margin: 0 2px;
-}
-
-window#waybar.left #custom-voxtype,
-window#waybar.right #custom-voxtype {
-  margin: 4px 0;
-  padding: 0;
-  min-width: 0;
-}
-
-#custom-voxtype.recording {
-  color: @error;
-  animation: voxtype-pulse 1s infinite;
-}
-
-#custom-voxtype.transcribing {
-  color: @secondary;
-}
-
-@keyframes voxtype-pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
 }
 
 #workspaces button {

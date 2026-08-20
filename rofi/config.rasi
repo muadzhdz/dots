@@ -133,7 +133,7 @@ window {
     
     background-color:   rgba(0, 0, 0, 0.4);
     border:             0px;
-    border-radius:      10px;
+    border-radius: 0;
     padding:            20px;
 }
 
@@ -186,7 +186,7 @@ textbox {
     background-color:   transparent;
     text-color:         @var-text-dim;
     padding:            8px 12px;
-    border-radius:      1px;
+    border-radius: 0;
     markup:             true;
     font:               "JetBrainsMono Nerd Font 9";
     horizontal-align:   0.5;
@@ -205,14 +205,14 @@ listview {
     fixed-height:       false;
     background-color:   transparent;
     border:             0;
-    border-radius: 10px;
+    border-radius: 0;
     /* Add this - reduces left margin */
     padding:            0;
 }
 
 element {
     padding:            8px 12px;
-    border-radius:      10px;
+    border-radius: 0;
     cursor:             pointer;
     /* Reduce spacing between icon and text */
     spacing:            6px;
