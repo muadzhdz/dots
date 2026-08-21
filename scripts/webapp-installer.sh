@@ -101,9 +101,11 @@ elif [[ "$action" == *"Remove"* ]]; then
     selected=$(echo -e "$list" | $ROFI_CMD "Select Web App:")
     [[ -z "$selected" ]] && exit 0
 
-    file_to_remove=$(echo "$selected" | awk -F'| ' '{print $2}')
+    file_to_remove="${selected##*| }"
     if [[ -n "$file_to_remove" ]] && [[ -f "$DESKTOP_DIR/$file_to_remove" ]]; then
         rm -f "$DESKTOP_DIR/$file_to_remove"
+        rm -f "$ICON_DIR/${file_to_remove%.desktop}.png"
+        command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
         notify "user-trash" "Web App Removed" "Removed $selected"
     fi
 fi

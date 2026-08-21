@@ -11,6 +11,7 @@ alias ls='eza -lh --group-directories-first --icons=auto'
 alias lsa='eza -lah --group-directories-first --icons=auto'
 alias lt='eza --tree --level=2 --icons=auto'
 alias lta='eza --tree --level=2 --all --icons=auto'
+alias dots-sync='bash ~/.config/scripts/dots-sync.sh'
 
 alias grep='grep --color=auto'
 _PS1_BASE='\w ❯ '

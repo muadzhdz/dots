@@ -128,16 +128,33 @@ sudo pacman -S --needed --noconfirm "${OFFICIAL_PKGS[@]}"
 log "[2/7] Installing AUR packages..."
 $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"
 
+# Hardware check (GPU / Platform)
+log "Detecting hardware platform..."
+if lspci 2>/dev/null | grep -qi nvidia; then
+    warn "  NVIDIA GPU detected. Ensure nvidia-dkms and proper DRM modesetting are enabled."
+elif lspci 2>/dev/null | grep -qi 'amd\|radeon'; then
+    log "  AMD GPU detected."
+elif lspci 2>/dev/null | grep -qi intel; then
+    log "  Intel GPU detected."
+fi
+
 # ---------------------------------------------------------------
-#  6. Copy configs
+#  6. Copy configs with safe auto-backup
 # ---------------------------------------------------------------
+BACKUP_DIR="$HOME/.config.backup-$(date +%Y%m%d_%H%M%S)"
+log "[3/7] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
+mkdir -p "$BACKUP_DIR"
+for item in hypr matugen scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim voxtype fastfetch Kvantum; do
+    if [[ -d "$DEST/$item" ]]; then
+        cp -r "$DEST/$item" "$BACKUP_DIR/" 2>/dev/null || true
+    fi
+done
+
 copy_to() { # $1=src  $2=dst
     echo "  -> $2"
     mkdir -p "$DEST/$2"
     cp -r "$SCRIPT_DIR/$1/." "$DEST/$2/"
 }
-
-log "[3/7] Copying configs to $DEST"
 copy_to hypr           hypr
 copy_to matugen        matugen
 copy_to scripts        scripts
@@ -155,8 +172,19 @@ copy_to gtk/gtk-3.0    gtk-3.0
 copy_to gtk/gtk-4.0    gtk-4.0
 copy_to obs-studio     obs-studio
 copy_to nvim           nvim
+copy_to voxtype        voxtype
+copy_to fastfetch      fastfetch
+copy_to Kvantum        Kvantum
 
 chmod +x "$DEST"/scripts/*.sh 2>/dev/null || true
+
+# build clipboard-multi helper (image + text multi-mime clipboard)
+log "  -> clipboard-multi"
+mkdir -p "$HOME/.local/bin"
+cc -O2 -o "$HOME/.local/bin/clipboard-multi" \
+    "$SCRIPT_DIR/scripts/clipboard-multi/clipboard-multi.c" \
+    "$SCRIPT_DIR/scripts/clipboard-multi/zwlr-client-protocol.c" \
+    $(pkg-config --cflags --libs wayland-client)
 
 # ---------------------------------------------------------------
 #  7. User services

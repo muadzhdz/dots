@@ -48,6 +48,8 @@ hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(scriptsDir .. "/webapp-instal
 hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd(scriptsDir .. "/default-browser.sh"),    { description = "Default Browser Switcher" })
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("gtk-launch \"$(xdg-settings get default-web-browser 2>/dev/null || echo firefox.desktop)\""), { description = "Default Browser" })
 hl.bind(mainMod .. " + CTRL + B",  hl.dsp.exec_cmd("bash " .. scriptsDir .. "/border-mode.sh menu"), { description = "Border Mode" })
+hl.bind(mainMod .. " + ALT + A",   hl.dsp.exec_cmd(scriptsDir .. "/audio-switcher.sh sink"),   { description = "Audio Output Switcher" })
+hl.bind(mainMod .. " + ALT + SHIFT + A", hl.dsp.exec_cmd(scriptsDir .. "/audio-switcher.sh source"), { description = "Audio Input (Mic) Switcher" })
 
 hl.bind("Print",                 hl.dsp.exec_cmd(screenshot))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd(screenshot))

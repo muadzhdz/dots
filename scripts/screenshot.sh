@@ -125,11 +125,11 @@ case "$PROCESSING" in
   slurp)
     grim -g "$SELECTION" "$FILEPATH" || exit 1
     echo "$FILEPATH"
-    printf '%s' "$FILEPATH" | wl-copy
+    clipboard-multi "$FILEPATH" "$FILEPATH"
     echo "SCREENSHOT:$FILEPATH" | cliphist store
 
     (
-      ACTION=$(notify-send "Screenshot saved — path copied to clipboard" "Edit with Super + Alt + , (or click this)" -t 10000 -i "$FILEPATH" -A "default=edit")
+      ACTION=$(notify-send "Screenshot saved — image copied" "Path in terminal: Ctrl+Shift+V (Super + Alt + , to edit)" -t 10000 -i "$FILEPATH" -A "default=edit")
       [[ $ACTION == "default" ]] && open_editor "$FILEPATH"
     ) >/dev/null 2>&1 &
     ;;

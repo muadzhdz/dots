@@ -83,10 +83,10 @@ apply_noborder() {
 
 apply_border() {
     hyprctl eval 'hl.config({ decoration = { rounding = 10 } })' >/dev/null
-    cp "$DOTS/mako/config" "$HOME/.config/mako/config"
-    cp "$DOTS/waybar/style.css" "$HOME/.config/waybar/style.css"
-    cp "$DOTS/swayosd/style.css" "$HOME/.config/swayosd/style.css"
-    cp "$DOTS/rofi/config.rasi" "$HOME/.config/rofi/config.rasi"
+    cp "$DIR/mako.conf.border" "$HOME/.config/mako/config"
+    cp "$DIR/waybar.style.border" "$HOME/.config/waybar/style.css"
+    cp "$DIR/swayosd.style.border" "$HOME/.config/swayosd/style.css"
+    cp "$DIR/rofi.config.border" "$HOME/.config/rofi/config.rasi"
     apply_waybar_width border
     echo "border" > "$MARKER"
 }
