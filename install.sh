@@ -33,9 +33,9 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log ""
     log "This installer would:"
     log "  1. Install official packages: ${OFFICIAL_PKGS[*]:-hyprland waybar mako ...}"
-    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + voxtype"
+    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + voxtype-bin"
     log "  3. Copy configs to $DEST"
-    log "  4. Enable user services: swayosd-server, voxtype"
+    log "  4. Enable user services: swayosd-server, voxtype-bin (gpu + whisper-small model)"
     log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
     log "  6. Setup SDDM, PostgreSQL, MariaDB, UFW, plocate"
     log "  7. Build + install fetch from source"
@@ -95,7 +95,7 @@ AUR_PKGS=(
 )
 
 AUR_PKGS_INTERACTIVE=(
-    voxtype
+    voxtype-bin
 )
 
 # ---------------------------------------------------------------
@@ -143,8 +143,9 @@ if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
     fi
 fi
 
-# voxtype has multiple AUR providers — install it separately to avoid
-# the interactive provider prompt blocking --noconfirm
+# voxtype: use voxtype-bin (precompiled — source build takes very long).
+# Installed separately since it's a multi-provider AUR package
+# (prompt would block --noconfirm in the combined install).
 log "  -> voxtype"
 if [[ ${#AUR_PKGS_INTERACTIVE[@]} -gt 0 ]]; then
     if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS_INTERACTIVE[@]}"; then
@@ -259,6 +260,23 @@ else
     step_fail "swayosd-server"
 fi
 
+# voxtype: preflight setup (input group, GPU, models) BEFORE starting daemon
+if command -v voxtype >/dev/null 2>&1; then
+    log "  -> voxtype setup (input group, GPU, model)"
+    if ! id -nG | tr ' ' '\n' | grep -qx input; then
+        sudo usermod -aG input "$USER" 2>/dev/null
+        warn "  added $USER to the 'input' group — re-login for evdev hotkeys"
+    fi
+    sudo voxtype setup gpu --enable 2>/dev/null || true
+    # download Whisper small (multilingual: Indonesian + English) + VAD model
+    voxtype setup --download --model small --quiet 2>/dev/null || \
+        warn "  model download failed (run: voxtype setup --download --model small)"
+    voxtype setup vad 2>/dev/null || true
+    step_ok "voxtype (gpu + models)"
+else
+    warn "  voxtype binary not found"
+fi
+
 if systemctl --user enable --now voxtype.service 2>/dev/null; then
     step_ok "voxtype"
 else
@@ -324,9 +342,10 @@ fi
 #  9. PostgreSQL — create user role matching login user
 # ---------------------------------------------------------------
 log "  -> PostgreSQL"
-# init data directory first if missing
-if [[ ! -d /var/lib/postgres/data ]]; then
-    sudo postgresql-setup --initdb 2>/dev/null || true
+# init data directory first if missing (Arch: use initdb directly, no postgresql-setup)
+if [[ ! -f /var/lib/postgres/data/PG_VERSION ]]; then
+    sudo -u postgres /usr/bin/initdb -D /var/lib/postgres/data --locale=C.UTF-8 -E UTF8 2>/dev/null || \
+        warn "  PostgreSQL initdb failed"
 fi
 if sudo systemctl enable --now postgresql 2>/dev/null; then
     if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$USER'" 2>/dev/null | grep -q 1; then
