@@ -1,8 +1,12 @@
+<div align="center">
+
 # dots
 
 Personal Hyprland dotfiles — monochrome dark theme, no matugen.
 
 ![preview](preview.gif)
+
+</div>
 
 ## Install
 
