@@ -4,7 +4,7 @@
   "on-sigusr1": "hide",
   "spacing": 0,
   "height": 37,
-                                                                                                                                "modules-left": ["custom/arch", "hyprland/workspaces"],
+  "modules-left": ["custom/arch", "hyprland/workspaces"],
   "modules-center": ["custom/voxtype", "clock"],
   "modules-right": [
     "tray",
