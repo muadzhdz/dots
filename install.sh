@@ -33,7 +33,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log ""
     log "This installer would:"
     log "  1. Install official packages: ${OFFICIAL_PKGS[*]:-hyprland waybar mako ...}"
-    log "  2. Install AUR packages: sddm-silent-theme ttf-material-symbols ..."
+    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + voxtype"
     log "  3. Copy configs to $DEST"
     log "  4. Enable user services: swayosd-server, voxtype"
     log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
@@ -76,6 +76,7 @@ OFFICIAL_PKGS=(
     brightnessctl
     wl-clipboard wtype wireplumber pipewire-pulse
     ttf-jetbrains-mono-nerd noto-fonts ttf-dejavu
+    ttf-material-symbols-variable
     adw-gtk-theme papirus-icon-theme kvantum
     obs-studio cmatrix tree chafa mpv imv
     gnome-disk-utility eza xdg-user-dirs
@@ -90,8 +91,10 @@ OFFICIAL_PKGS=(
 
 AUR_PKGS=(
     sddm-silent-theme
-    ttf-material-symbols-variable-git
     redhat-fonts
+)
+
+AUR_PKGS_INTERACTIVE=(
     voxtype
 )
 
@@ -131,10 +134,24 @@ else
 fi
 
 log "[2/6] Installing AUR packages..."
-if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"; then
-    step_ok "AUR packages"
-else
-    step_fail "AUR packages"
+# Install non-interactive AUR packages first
+if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
+    if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"; then
+        step_ok "AUR packages"
+    else
+        step_fail "AUR packages"
+    fi
+fi
+
+# voxtype has multiple AUR providers — install it separately to avoid
+# the interactive provider prompt blocking --noconfirm
+log "  -> voxtype"
+if [[ ${#AUR_PKGS_INTERACTIVE[@]} -gt 0 ]]; then
+    if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS_INTERACTIVE[@]}"; then
+        step_ok "voxtype"
+    else
+        step_fail "voxtype"
+    fi
 fi
 
 # Hardware check (GPU / Platform)
@@ -307,6 +324,10 @@ fi
 #  9. PostgreSQL — create user role matching login user
 # ---------------------------------------------------------------
 log "  -> PostgreSQL"
+# init data directory first if missing
+if [[ ! -d /var/lib/postgres/data ]]; then
+    sudo postgresql-setup --initdb 2>/dev/null || true
+fi
 if sudo systemctl enable --now postgresql 2>/dev/null; then
     if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$USER'" 2>/dev/null | grep -q 1; then
         sudo -u postgres createuser --superuser "$USER" 2>/dev/null || true
@@ -329,6 +350,10 @@ fi
 #  10. MariaDB — create user role matching login user
 # ---------------------------------------------------------------
 log "  -> MariaDB"
+# init data directory first if missing
+if [[ ! -d /var/lib/mysql/mysql ]]; then
+    sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql 2>/dev/null || true
+fi
 if sudo systemctl enable --now mariadb 2>/dev/null; then
     if ! sudo mariadb -e "SELECT User FROM mysql.user WHERE User='$USER'" 2>/dev/null | grep -q "$USER"; then
         sudo mariadb -e "CREATE USER '$USER'@'localhost' IDENTIFIED BY ''; GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>/dev/null || true
@@ -415,18 +440,18 @@ log "Verifying critical services..."
 SVC_OK=0; SVC_FAIL=0
 for svc in systemd-networkd systemd-resolved iwd bluetooth; do
     if systemctl is-active --quiet "$svc" 2>/dev/null; then
-        ((SVC_OK++))
+        SVC_OK=$((SVC_OK + 1))
     else
         warn "  ✗ $svc not running"
-        ((SVC_FAIL++))
+        SVC_FAIL=$((SVC_FAIL + 1))
     fi
 done
 for svc in swayosd-server voxtype; do
     if systemctl --user is-active --quiet "$svc" 2>/dev/null; then
-        ((SVC_OK++))
+        SVC_OK=$((SVC_OK + 1))
     else
         warn "  ✗ $svc (user) not running"
-        ((SVC_FAIL++))
+        SVC_FAIL=$((SVC_FAIL + 1))
     fi
 done
 log "  Services: $SVC_OK running, $SVC_FAIL not running"
