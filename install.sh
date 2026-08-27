@@ -33,9 +33,9 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log ""
     log "This installer would:"
     log "  1. Install official packages: ${OFFICIAL_PKGS[*]:-hyprland waybar mako ...}"
-    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + voxtype-bin"
+    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts"
     log "  3. Copy configs to $DEST"
-    log "  4. Enable user services: swayosd-server, voxtype-bin (gpu + whisper-small model)"
+    log "  4. Enable user services: swayosd-server"
     log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
     log "  6. Setup SDDM, PostgreSQL, MariaDB, UFW, plocate"
     log "  7. Build + install fetch from source"
@@ -94,9 +94,6 @@ AUR_PKGS=(
     redhat-fonts
 )
 
-# voxtype package selected dynamically after GPU detection in section 4
-AUR_PKGS_INTERACTIVE=()
-
 # ---------------------------------------------------------------
 #  3. AUR helper (install BOTH paru and yay)
 # ---------------------------------------------------------------
@@ -134,48 +131,24 @@ fi
 
 log "[2/6] Installing AUR packages..."
 
-# Detect GPU → pick the right voxtype package
+# Detect GPU (informational — arch-appropriate driver notes)
 log "Detecting GPU..."
-GPU_VENDOR="unknown"
 if lspci 2>/dev/null | grep -qi nvidia; then
-    GPU_VENDOR="nvidia"
-    VOXTYPE_PKG="voxtype-cuda"
-    warn "  NVIDIA GPU detected — voxtype-cuda (CUDA). Ensure nvidia-dkms + DRM modesetting."
+    warn "  NVIDIA GPU detected. Ensure nvidia-dkms and proper DRM modesetting are enabled."
 elif lspci 2>/dev/null | grep -qi 'amd\|radeon\|ati'; then
-    GPU_VENDOR="amd"
-    VOXTYPE_PKG="voxtype-bin"
-    log "  AMD GPU detected — voxtype-bin (Vulkan)."
+    log "  AMD GPU detected."
 elif lspci 2>/dev/null | grep -qi 'intel\|integrated\|i915'; then
-    GPU_VENDOR="intel"
-    VOXTYPE_PKG="voxtype-bin"
-    log "  Intel GPU detected — voxtype-bin (Vulkan/CPU)."
+    log "  Intel GPU detected."
 else
-    VOXTYPE_PKG="voxtype-bin"
-    log "  GPU not detected — voxtype-bin (CPU inference)."
+    log "  GPU not detected."
 fi
 
-# Install non-interactive AUR packages first
+# Install AUR packages
 if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
     if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"; then
         step_ok "AUR packages"
     else
         step_fail "AUR packages"
-    fi
-fi
-
-# voxtype: package depends on GPU (cuda for NVIDIA, bin for AMD/Intel/other).
-# Installed separately since it's a multi-provider AUR package
-# (prompt would block --noconfirm in the combined install).
-AUR_PKGS_INTERACTIVE=("$VOXTYPE_PKG")
-# voxtype/voxtype-bin/voxtype-cuda all provide /usr/bin/voxtype — remove
-# any previously installed variant so --noconfirm doesn't hit a conflict.
-sudo pacman -R --noconfirm voxtype voxtype-bin voxtype-cuda 2>/dev/null || true
-log "  -> voxtype ($VOXTYPE_PKG)"
-if [[ ${#AUR_PKGS_INTERACTIVE[@]} -gt 0 ]]; then
-    if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS_INTERACTIVE[@]}"; then
-        step_ok "voxtype"
-    else
-        step_fail "voxtype"
     fi
 fi
 
@@ -185,7 +158,7 @@ fi
 BACKUP_DIR="$HOME/.config.backup-$(date +%Y%m%d_%H%M%S)"
 log "[3/6] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
 mkdir -p "$BACKUP_DIR"
-for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim voxtype Kvantum; do
+for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim Kvantum; do
     if [[ -d "$DEST/$item" ]]; then
         cp -r "$DEST/$item" "$BACKUP_DIR/" 2>/dev/null || true
     fi
@@ -226,7 +199,6 @@ copy_to gtk/gtk-3.0    gtk-3.0
 copy_to gtk/gtk-4.0    gtk-4.0
 copy_to obs-studio     obs-studio
 copy_to nvim           nvim
-copy_to voxtype        voxtype
 copy_to Kvantum        Kvantum
 copy_to nix            nix
 
@@ -272,48 +244,6 @@ if systemctl --user enable --now swayosd-server.service 2>/dev/null; then
     step_ok "swayosd-server"
 else
     step_fail "swayosd-server"
-fi
-
-# voxtype: preflight setup (input group, GPU, models) BEFORE starting daemon
-if command -v voxtype >/dev/null 2>&1; then
-    log "  -> voxtype setup (input group, GPU, model)"
-    if ! id -nG | tr ' ' '\n' | grep -qx input; then
-        sudo usermod -aG input "$USER" 2>/dev/null
-        warn "  added $USER to the 'input' group — re-login for evdev hotkeys"
-    fi
-    sudo voxtype setup gpu --enable 2>/dev/null || true
-    # Download the Whisper model with visible progress (HuggingFace
-    # whisper.cpp mirror — identical to what voxtype itself pulls).
-    # 'voxtype setup --download --quiet' is silent, so use curl here.
-    MODEL_DIR="$HOME/.local/share/voxtype/models"
-    MODEL_FILE="ggml-small.bin"
-    mkdir -p "$MODEL_DIR"
-    if [[ ! -f "$MODEL_DIR/$MODEL_FILE" ]]; then
-        log "  -> downloading Whisper $MODEL_FILE (465 MB) from HuggingFace..."
-        if curl -fL --retry 3 --progress-bar \
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$MODEL_FILE" \
-            -o "$MODEL_DIR/$MODEL_FILE.part"; then
-            mv "$MODEL_DIR/$MODEL_FILE.part" "$MODEL_DIR/$MODEL_FILE"
-            step_ok "whisper model ($MODEL_FILE)"
-        else
-            rm -f "$MODEL_DIR/$MODEL_FILE.part"
-            warn "  direct download failed — falling back to voxtype"
-            voxtype setup --download 2>/dev/null || \
-                warn "  model download failed (run: voxtype setup --download)"
-        fi
-    else
-        log "  -> Whisper model already present ($MODEL_FILE)"
-    fi
-    voxtype setup vad 2>/dev/null || true
-    step_ok "voxtype (gpu + models)"
-else
-    warn "  voxtype binary not found"
-fi
-
-if systemctl --user enable --now voxtype.service 2>/dev/null; then
-    step_ok "voxtype"
-else
-    step_fail "voxtype"
 fi
 
 # swayosd needs write access to /sys/class/backlight/*/brightness,
@@ -498,7 +428,7 @@ for svc in systemd-networkd systemd-resolved iwd bluetooth; do
         SVC_FAIL=$((SVC_FAIL + 1))
     fi
 done
-for svc in swayosd-server voxtype; do
+for svc in swayosd-server; do
     if systemctl --user is-active --quiet "$svc" 2>/dev/null; then
         SVC_OK=$((SVC_OK + 1))
     else
@@ -547,5 +477,4 @@ Notes:
   * Requires Hyprland >= 0.55
   * SDDM mirrors your wallpaper automatically
   * Both paru and yay installed
-  * voxtype daemon runs on login (push-to-talk dictation)
 EOF
