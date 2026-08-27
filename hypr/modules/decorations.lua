@@ -2,18 +2,7 @@
 ---- LOOK AND FEEL ----
 -----------------------
 
--- Pure Monochrome Configuration (Dark / Light) - No Border Radius (Sharp 0)
-
-local theme_file = io.open(os.getenv("HOME") .. "/.config/scripts/.theme", "r")
-local theme = "dark"
-if theme_file then
-    theme = theme_file:read("*l") or "dark"
-    theme_file:close()
-end
-
-local is_dark = (theme ~= "light")
-local active_border_col = is_dark and "rgba(ffffffff)" or "rgba(000000ff)"
-local inactive_border_col = is_dark and "rgba(333333ff)" or "rgba(ccccccff)"
+-- Pure Monochrome Configuration (Dark Only)
 
 hl.config({
     general = {
@@ -23,8 +12,8 @@ hl.config({
         border_size = 1,
 
         col = {
-            active_border   = { colors = {active_border_col} },
-            inactive_border = inactive_border_col,
+            active_border   = { colors = {"rgba(ffffffff)"} },
+            inactive_border = "rgba(333333ff)",
         },
 
         resize_on_border = true,

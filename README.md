@@ -2,6 +2,8 @@
 
 Personal Hyprland dotfiles — monochrome dark theme, no matugen.
 
+<!-- Add screenshot here: ![preview](screenshot.png) -->
+
 ## Install
 
 ```bash

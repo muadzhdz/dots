@@ -4,7 +4,6 @@ scripts/__pycache__/
 rofi/.current_wallpaper
 hypr/.vscode/
 hypr/.monitor-cache
-matugen/templates/test.txt
 gtk-3.0/bookmarks
 waybar/.current_position
 obs-studio/logs/
@@ -13,3 +12,5 @@ obs-studio/.sentinel/
 obs-studio/plugin_config/obs-websocket/
 obs-studio/basic/scenes/
 systemd/user/*.wants/
+*.env
+.env*

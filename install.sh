@@ -32,6 +32,15 @@ command -v pacman >/dev/null || err "This installer only supports Arch-based dis
 command -v sudo >/dev/null || err "sudo is required."
 sudo -v
 
+# disk space check (minimum 5 GB free on /)
+AVAIL_KB=$(df / --output=avail | tail -1 | tr -d ' ')
+if [[ "$AVAIL_KB" -lt 5242880 ]]; then
+    warn "Low disk space: $(( AVAIL_KB / 1048576 )) GB free (recommended: 5 GB minimum)"
+    printf "Continue anyway? [y/N] "
+    read -r REPLY
+    [[ "$REPLY" =~ ^[Yy]$ ]] || exit 1
+fi
+
 # ---------------------------------------------------------------
 #  2. Package lists
 # ---------------------------------------------------------------
@@ -365,7 +374,30 @@ fi
 step_ok "bashrc + directories + wallpaper"
 
 # ---------------------------------------------------------------
-#  14. Final summary
+#  14. Verify critical services
+# ---------------------------------------------------------------
+log "Verifying critical services..."
+SVC_OK=0; SVC_FAIL=0
+for svc in systemd-networkd systemd-resolved iwd bluetooth; do
+    if systemctl is-active --quiet "$svc" 2>/dev/null; then
+        ((SVC_OK++))
+    else
+        warn "  ✗ $svc not running"
+        ((SVC_FAIL++))
+    fi
+done
+for svc in swayosd-server voxtype; do
+    if systemctl --user is-active --quiet "$svc" 2>/dev/null; then
+        ((SVC_OK++))
+    else
+        warn "  ✗ $svc (user) not running"
+        ((SVC_FAIL++))
+    fi
+done
+log "  Services: $SVC_OK running, $SVC_FAIL not running"
+
+# ---------------------------------------------------------------
+#  15. Final summary
 # ---------------------------------------------------------------
 printf "\n"
 if [[ ${#FAILED[@]} -eq 0 ]]; then

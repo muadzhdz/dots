@@ -5,6 +5,23 @@ set -euo pipefail
 # Pure Monochrome Theme Controller (Dark Only) - Strictly Black & White
 # ─────────────────────────────────────────────────────────────────────────────
 
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [COMMAND]
+
+Commands:
+  dark        Switch to dark theme (default)
+  current     Show current theme
+  reload      Reload current theme
+  help        Show this help
+
+Theme files live in ~/.config/themes/dark/
+EOF
+    exit 0
+}
+
+[[ "${1:-}" == "help" || "${1:-}" == "-h" || "${1:-}" == "--help" ]] && usage
+
 THEMES_DIR="$HOME/.config/themes"
 MARKER="$HOME/.config/scripts/.theme"
 LEGACY_MARKER="$HOME/.config/scripts/.theme-mode"
