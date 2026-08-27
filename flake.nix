@@ -1,5 +1,5 @@
 {
-  description = "Hyprland rice dev environment";
+  description = "Hyprland rice dev shell";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -16,38 +16,24 @@
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              nodejs_22
-              python3
-              go
-              rustc
-              cargo
               gcc
               gnumake
-              cmake
               pkg-config
+              python3
+              sqlite
               git
               curl
-              wget
               jq
               ripgrep
               fd
               eza
               bat
               fzf
-              lazygit
               neovim
-              tmux
-              sqlite
-              postgresql_17
-              mariadb
             ];
 
             shellHook = ''
               echo "dots dev shell active"
-              echo "  node $(node --version 2>/dev/null || echo 'not found')"
-              echo "  python $(python3 --version 2>/dev/null || echo 'not found')"
-              echo "  go $(go version 2>/dev/null | awk '{print $3}' || echo 'not found')"
-              echo "  rust $(rustc --version 2>/dev/null || echo 'not found')"
             '';
           };
         }
