@@ -49,16 +49,15 @@ OFFICIAL_PKGS=(
     chromium firefox
     neovim xdg-desktop-portal-hyprland
     imagemagick os-prober
+    plocate
+    postgresql mariadb
+    ufw
 )
 
 AUR_PKGS=(
     sddm-silent-theme
-    material-symbols-git
+    ttf-material-symbols-variable-git
     redhat-fonts
-    zen-browser-bin
-    helium-browser-bin
-    tor-browser-bin
-    visual-studio-code-bin
     voxtype
 )
 
@@ -88,45 +87,12 @@ command -v paru >/dev/null 2>&1 && AUR_HELPER="paru" || AUR_HELPER="yay"
 log "Using AUR helper: $AUR_HELPER (paru and yay both installed)"
 
 # ---------------------------------------------------------------
-#  4. Browser selection (multi-select, one or many)
+#  4. Install packages
 # ---------------------------------------------------------------
-choose_browsers() {
-    printf "\n${CYN}Pick browser(s) to install (comma-separated, e.g. '1,3,5'):${RST}\n"
-    printf "  ${GRN}1${RST}) chromium\n"
-    printf "  ${GRN}2${RST}) firefox\n"
-    printf "  ${GRN}3${RST}) zen-browser\n"
-    printf "  ${GRN}4${RST}) helium-browser\n"
-    printf "  ${GRN}5${RST}) tor-browser\n"
-    printf "  ${YLW}0${RST}) none\n"
-    printf "  ${CYN}> ${RST}"
-    read -r answer
-    answer="${answer// /}"
-    [[ -z "$answer" ]] && return 0
-    [[ "$answer" == "all" ]] && { OFFICIAL_PKGS+=("chromium" "firefox"); AUR_PKGS+=("zen-browser-bin" "helium-browser-bin" "tor-browser-bin"); return 0; }
-
-    local n
-    IFS=',' read -r -a nums <<< "$answer"
-    for n in "${nums[@]}"; do
-        case "$n" in
-            0) return 0 ;;
-            1) OFFICIAL_PKGS+=("chromium") ;;
-            2) OFFICIAL_PKGS+=("firefox") ;;
-            3) AUR_PKGS+=("zen-browser-bin") ;;
-            4) AUR_PKGS+=("helium-browser-bin") ;;
-            5) AUR_PKGS+=("tor-browser-bin") ;;
-            *) warn "Skipping invalid choice: $n" ;;
-        esac
-    done
-}
-choose_browsers
-
-# ---------------------------------------------------------------
-#  5. Install packages
-# ---------------------------------------------------------------
-log "[1/7] Installing official packages..."
+log "[1/6] Installing official packages..."
 sudo pacman -S --needed --noconfirm "${OFFICIAL_PKGS[@]}"
 
-log "[2/7] Installing AUR packages..."
+log "[2/6] Installing AUR packages..."
 $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"
 
 # Hardware check (GPU / Platform)
@@ -143,7 +109,7 @@ fi
 #  6. Copy configs with safe auto-backup
 # ---------------------------------------------------------------
 BACKUP_DIR="$HOME/.config.backup-$(date +%Y%m%d_%H%M%S)"
-log "[3/7] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
+log "[3/6] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
 mkdir -p "$BACKUP_DIR"
 for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim voxtype Kvantum; do
     if [[ -d "$DEST/$item" ]]; then
@@ -197,15 +163,23 @@ else
     log "  fetch already installed, skipping"
 fi
 
-# copy nix config (nix-command flakes)
+# copy nix config (nix-command flakes, sandbox off for DNS in flake fetch)
 log "  -> nix"
 mkdir -p "$DEST/nix"
 cp "$SCRIPT_DIR/nix/nix.conf" "$DEST/nix/nix.conf"
+# system-level nix.conf needs sandbox=false (restricted setting, can't set from user)
+sudo tee /etc/nix/nix.conf >/dev/null <<'NIXCONF'
+build-users-group = nixbld
+experimental-features = nix-command flakes
+sandbox = false
+NIXCONF
+sudo systemctl restart nix-daemon 2>/dev/null || true
+log "  /etc/nix/nix.conf updated (sandbox=false for DNS resolution)"
 
 # ---------------------------------------------------------------
 #  7. User services
 # ---------------------------------------------------------------
-log "[4/7] Enabling user services..."
+log "[4/6] Enabling user services..."
 systemctl --user daemon-reload
 systemctl --user enable --now graphical-session.target 2>/dev/null || true
 systemctl --user enable --now swayosd-server.service 2>/dev/null || true
@@ -221,7 +195,7 @@ fi
 # ---------------------------------------------------------------
 #  8. System services (systemd-networkd / iwd / bluetooth)
 # ---------------------------------------------------------------
-log "[5/7] Enabling system services..."
+log "[5/6] Enabling system services..."
 
 # systemd-networkd interface configs (Ethernet / Wi-Fi / WWAN via iwd)
 sudo mkdir -p /etc/systemd/network
@@ -251,7 +225,7 @@ fi
 # ---------------------------------------------------------------
 #  9. SDDM (theme + config + sudoers for wallpaper sync)
 # ---------------------------------------------------------------
-log "[6/7] Setting up SDDM..."
+log "[6/6] Setting up SDDM, databases, firewall, locate..."
 
 sudo mkdir -p /etc/sddm.conf.d
 if [[ -f /usr/share/sddm/themes/silent/Main.qml ]]; then
@@ -278,9 +252,82 @@ else
 fi
 
 # ---------------------------------------------------------------
-#  10. Misc: bashrc, user dirs, default wallpaper
+#  10. PostgreSQL — create user role matching login user
 # ---------------------------------------------------------------
-log "[7/7] Installing bashrc, user directories, wallpaper..."
+log "  -> PostgreSQL"
+sudo systemctl enable --now postgresql 2>/dev/null || true
+if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$USER'" | grep -q 1; then
+    sudo -u postgres createuser --superuser "$USER" 2>/dev/null || true
+    log "  created PostgreSQL superuser role: $USER"
+fi
+# Allow local passwordless auth via peer (socket) + md5 (tcp)
+PG_HBA="/var/lib/postgres/data/pg_hba.conf"
+if [[ -f "$PG_HBA" ]]; then
+    if ! sudo grep -qs "^local.*all.*$USER.*peer" "$PG_HBA" 2>/dev/null; then
+        echo "local all $USER peer" | sudo tee -a "$PG_HBA" >/dev/null
+        echo "host  all $USER 127.0.0.1/32 md5" | sudo tee -a "$PG_HBA" >/dev/null
+        echo "host  all $USER ::1/128 md5" | sudo tee -a "$PG_HBA" >/dev/null
+        sudo systemctl restart postgresql 2>/dev/null || true
+        log "  added peer/md5 auth rules for $USER"
+    fi
+fi
+
+# ---------------------------------------------------------------
+#  11. MariaDB — create user role matching login user
+# ---------------------------------------------------------------
+log "  -> MariaDB"
+sudo systemctl enable --now mariadb 2>/dev/null || true
+if ! sudo mariadb -e "SELECT User FROM mysql.user WHERE User='$USER'" 2>/dev/null | grep -q "$USER"; then
+    sudo mariadb -e "CREATE USER '$USER'@'localhost' IDENTIFIED BY ''; GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>/dev/null || true
+    log "  created MariaDB user: $USER (localhost, no password)"
+fi
+
+# ---------------------------------------------------------------
+#  12. UFW firewall
+# ---------------------------------------------------------------
+log "  -> UFW firewall"
+sudo ufw --force enable 2>/dev/null || true
+sudo ufw default deny incoming 2>/dev/null || true
+sudo ufw default allow outgoing 2>/dev/null || true
+sudo ufw allow 22/tcp 2>/dev/null || true   # SSH
+sudo ufw allow 80/tcp 2>/dev/null || true   # HTTP
+sudo ufw allow 443/tcp 2>/dev/null || true  # HTTPS
+sudo systemctl enable --now ufw 2>/dev/null || true
+log "  UFW enabled: deny incoming, allow outgoing, ports 22/80/443 open"
+
+# ---------------------------------------------------------------
+#  13. plocate — updatedb
+# ---------------------------------------------------------------
+log "  -> plocate database"
+sudo updatedb 2>/dev/null || true
+if [[ ! -f /etc/systemd/system/updatedb.timer ]]; then
+    sudo tee /etc/systemd/system/updatedb.timer >/dev/null <<'EOF'
+[Unit]
+Description=Update locate database weekly
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+    sudo tee /etc/systemd/system/updatedb.service >/dev/null <<'EOF'
+[Unit]
+Description=Update locate database
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/updatedb
+EOF
+    sudo systemctl enable --now updatedb.timer 2>/dev/null || true
+    log "  weekly updatedb timer enabled"
+fi
+
+# ---------------------------------------------------------------
+#  14. Misc: bashrc, user dirs, default wallpaper
+# ---------------------------------------------------------------
+log "Installing bashrc, user directories, wallpaper..."
 
 # Install repo bashrc (no backup — repo is the source of truth)
 if [[ -f "$SCRIPT_DIR/bashrc" ]]; then
@@ -330,7 +377,10 @@ Notes:
   * SDDM theme will mirror your current wallpaper automatically
     (post_hook runs sddm-sync.sh via the sudoers rule above)
   * Both paru and yay are installed; use whichever you prefer.
-  * Nix is configured with flakes support (nix.conf backed up to dots/nix/)
+  * Nix: run 'nix develop' in ~/dots for dev shell (node, python, go, rust, etc.)
   * voxtype daemon is enabled — runs on login for push-to-talk dictation
   * fetch (3D spinning logo) is installed to ~/.local/bin/fetch
+  * PostgreSQL + MariaDB: user '$USER' has full access (no sudo needed)
+  * UFW firewall enabled: deny incoming, allow outgoing, ports 22/80/443
+  * plocate: updatedb runs weekly, use 'locate' to find files
 EOF
