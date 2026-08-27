@@ -2,7 +2,7 @@
 Description=routerd - software WiFi access point / router
 Documentation=https://github.com/muadzhdz/routerd
 Wants=network-online.target
-After=network-online.target NetworkManager.service wpa_supplicant.service
+After=network-online.target
 
 [Service]
 Type=simple
