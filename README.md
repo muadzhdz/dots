@@ -5,7 +5,7 @@ Personal Hyprland dotfiles — monochrome dark theme, no matugen.
 ## Install
 
 ```bash
-git clone https://github.com/muadzhdz/dots ~/dots && cd ~/dots
+git clone https://github.com/muadzhdz/dots && cd dots
 ./install.sh
 ```
 
