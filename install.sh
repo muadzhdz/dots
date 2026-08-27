@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------
-#  dots installer — Hyprland rice with Material You theming
+#  dots installer — Hyprland rice, monochrome dark theme
 #  Requires: Arch Linux (or derivative) with sudo
 #  Usage:    ./install.sh
 # ---------------------------------------------------------------
@@ -19,6 +19,10 @@ err()  { printf "${RED}[dots]${RST} %s\n" "$*"; exit 1; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEST="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+FAILED=()
+step_ok() { log "  ✓ $1"; }
+step_fail() { warn "  ✗ $1"; FAILED+=("$1"); }
 
 # ---------------------------------------------------------------
 #  1. Environment checks
@@ -90,10 +94,18 @@ log "Using AUR helper: $AUR_HELPER (paru and yay both installed)"
 #  4. Install packages
 # ---------------------------------------------------------------
 log "[1/6] Installing official packages..."
-sudo pacman -S --needed --noconfirm "${OFFICIAL_PKGS[@]}"
+if sudo pacman -S --needed --noconfirm "${OFFICIAL_PKGS[@]}"; then
+    step_ok "official packages"
+else
+    step_fail "official packages"
+fi
 
 log "[2/6] Installing AUR packages..."
-$AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"
+if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"; then
+    step_ok "AUR packages"
+else
+    step_fail "AUR packages"
+fi
 
 # Hardware check (GPU / Platform)
 log "Detecting hardware platform..."
@@ -106,7 +118,7 @@ elif lspci 2>/dev/null | grep -qi intel; then
 fi
 
 # ---------------------------------------------------------------
-#  6. Copy configs with safe auto-backup
+#  5. Copy configs with safe auto-backup
 # ---------------------------------------------------------------
 BACKUP_DIR="$HOME/.config.backup-$(date +%Y%m%d_%H%M%S)"
 log "[3/6] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
@@ -143,47 +155,63 @@ copy_to Kvantum        Kvantum
 copy_to nix            nix
 
 chmod +x "$DEST"/scripts/*.sh 2>/dev/null || true
+step_ok "configs copied"
 
 # build clipboard-multi helper (image + text multi-mime clipboard)
 log "  -> clipboard-multi"
 mkdir -p "$HOME/.local/bin"
-cc -O2 -o "$HOME/.local/bin/clipboard-multi" \
+if cc -O2 -o "$HOME/.local/bin/clipboard-multi" \
     "$SCRIPT_DIR/scripts/clipboard-multi/clipboard-multi.c" \
     "$SCRIPT_DIR/scripts/clipboard-multi/zwlr-client-protocol.c" \
-    $(pkg-config --cflags --libs wayland-client)
+    $(pkg-config --cflags --libs wayland-client) 2>/dev/null; then
+    step_ok "clipboard-multi"
+else
+    step_fail "clipboard-multi"
+fi
 
 # build fetch (3D spinning distro logo)
 log "  -> fetch"
 if [[ ! -f "$HOME/.local/bin/fetch" ]]; then
-    git clone https://github.com/areofyl/fetch.git /tmp/fetch-build
-    (cd /tmp/fetch-build && make && PREFIX="$HOME/.local" make install)
-    rm -rf /tmp/fetch-build
-    log "  installed fetch to ~/.local/bin/fetch"
+    if git clone https://github.com/areofyl/fetch.git /tmp/fetch-build 2>/dev/null && \
+       (cd /tmp/fetch-build && make && PREFIX="$HOME/.local" make install) 2>/dev/null; then
+        rm -rf /tmp/fetch-build
+        step_ok "fetch"
+    else
+        rm -rf /tmp/fetch-build
+        step_fail "fetch"
+    fi
 else
-    log "  fetch already installed, skipping"
+    step_ok "fetch (already installed)"
 fi
 
 # copy nix config (nix-command flakes, sandbox off for DNS in flake fetch)
 log "  -> nix"
 mkdir -p "$DEST/nix"
 cp "$SCRIPT_DIR/nix/nix.conf" "$DEST/nix/nix.conf"
-# system-level nix.conf needs sandbox=false (restricted setting, can't set from user)
 sudo tee /etc/nix/nix.conf >/dev/null <<'NIXCONF'
 build-users-group = nixbld
 experimental-features = nix-command flakes
 sandbox = false
 NIXCONF
 sudo systemctl restart nix-daemon 2>/dev/null || true
-log "  /etc/nix/nix.conf updated (sandbox=false for DNS resolution)"
+step_ok "nix config"
 
 # ---------------------------------------------------------------
-#  7. User services
+#  6. User services
 # ---------------------------------------------------------------
 log "[4/6] Enabling user services..."
 systemctl --user daemon-reload
-systemctl --user enable --now graphical-session.target 2>/dev/null || true
-systemctl --user enable --now swayosd-server.service 2>/dev/null || true
-systemctl --user enable --now voxtype.service 2>/dev/null || true
+if systemctl --user enable --now swayosd-server.service 2>/dev/null; then
+    step_ok "swayosd-server"
+else
+    step_fail "swayosd-server"
+fi
+
+if systemctl --user enable --now voxtype.service 2>/dev/null; then
+    step_ok "voxtype"
+else
+    step_fail "voxtype"
+fi
 
 # swayosd needs write access to /sys/class/backlight/*/brightness,
 # which is group-writable by the 'video' group (see 99-swayosd.rules).
@@ -193,7 +221,7 @@ if ! id -nG | tr ' ' '\n' | grep -qx video; then
 fi
 
 # ---------------------------------------------------------------
-#  8. System services (systemd-networkd / iwd / bluetooth)
+#  7. System services (systemd-networkd / iwd / bluetooth)
 # ---------------------------------------------------------------
 log "[5/6] Enabling system services..."
 
@@ -210,9 +238,10 @@ sudo systemctl enable --now systemd-resolved 2>/dev/null || true
 sudo systemctl enable --now iwd 2>/dev/null || true
 sudo systemctl enable --now bluetooth 2>/dev/null || true
 sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
+step_ok "system services"
 
 # ---------------------------------------------------------------
-#  9. SDDM (theme + config + sudoers for wallpaper sync)
+#  8. SDDM (theme + config + sudoers for wallpaper sync)
 # ---------------------------------------------------------------
 log "[6/6] Setting up SDDM, databases, firewall, locate..."
 
@@ -229,65 +258,71 @@ EOF
     sudo systemctl enable --now sddm 2>/dev/null || true
 
     # Allow sddm-sync.sh (runs as root via sudo) to read the user's wallpaper cache.
-    # Only needed if you want the current wallpaper mirrored to the SDDM login screen.
     SUDOERS_LINE="$USER ALL=(root) NOPASSWD: $DEST/scripts/sddm-sync.sh"
     if ! sudo grep -qs "sddm-sync.sh" /etc/sudoers.d/sddm-sync 2>/dev/null; then
         echo "$SUDOERS_LINE" | sudo tee /etc/sudoers.d/sddm-sync >/dev/null
         sudo chmod 440 /etc/sudoers.d/sddm-sync
-        log "  sudoers rule added for sddm-sync.sh"
     fi
+    step_ok "SDDM"
 else
-    warn "  sddm-silent-theme not found in /usr/share/sddm/themes/silent — skipping SDDM setup."
+    step_fail "SDDM (sddm-silent-theme not found)"
 fi
 
 # ---------------------------------------------------------------
-#  10. PostgreSQL — create user role matching login user
+#  9. PostgreSQL — create user role matching login user
 # ---------------------------------------------------------------
 log "  -> PostgreSQL"
-sudo systemctl enable --now postgresql 2>/dev/null || true
-if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$USER'" | grep -q 1; then
-    sudo -u postgres createuser --superuser "$USER" 2>/dev/null || true
-    log "  created PostgreSQL superuser role: $USER"
-fi
-# Allow local passwordless auth via peer (socket) + md5 (tcp)
-PG_HBA="/var/lib/postgres/data/pg_hba.conf"
-if [[ -f "$PG_HBA" ]]; then
-    if ! sudo grep -qs "^local.*all.*$USER.*peer" "$PG_HBA" 2>/dev/null; then
-        echo "local all $USER peer" | sudo tee -a "$PG_HBA" >/dev/null
-        echo "host  all $USER 127.0.0.1/32 md5" | sudo tee -a "$PG_HBA" >/dev/null
-        echo "host  all $USER ::1/128 md5" | sudo tee -a "$PG_HBA" >/dev/null
-        sudo systemctl restart postgresql 2>/dev/null || true
-        log "  added peer/md5 auth rules for $USER"
+if sudo systemctl enable --now postgresql 2>/dev/null; then
+    if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$USER'" 2>/dev/null | grep -q 1; then
+        sudo -u postgres createuser --superuser "$USER" 2>/dev/null || true
     fi
+    PG_HBA="/var/lib/postgres/data/pg_hba.conf"
+    if [[ -f "$PG_HBA" ]]; then
+        if ! sudo grep -qs "^local.*all.*$USER.*peer" "$PG_HBA" 2>/dev/null; then
+            echo "local all $USER peer" | sudo tee -a "$PG_HBA" >/dev/null
+            echo "host  all $USER 127.0.0.1/32 md5" | sudo tee -a "$PG_HBA" >/dev/null
+            echo "host  all $USER ::1/128 md5" | sudo tee -a "$PG_HBA" >/dev/null
+            sudo systemctl restart postgresql 2>/dev/null || true
+        fi
+    fi
+    step_ok "PostgreSQL"
+else
+    step_fail "PostgreSQL"
 fi
 
 # ---------------------------------------------------------------
-#  11. MariaDB — create user role matching login user
+#  10. MariaDB — create user role matching login user
 # ---------------------------------------------------------------
 log "  -> MariaDB"
-sudo systemctl enable --now mariadb 2>/dev/null || true
-if ! sudo mariadb -e "SELECT User FROM mysql.user WHERE User='$USER'" 2>/dev/null | grep -q "$USER"; then
-    sudo mariadb -e "CREATE USER '$USER'@'localhost' IDENTIFIED BY ''; GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>/dev/null || true
-    log "  created MariaDB user: $USER (localhost, no password)"
+if sudo systemctl enable --now mariadb 2>/dev/null; then
+    if ! sudo mariadb -e "SELECT User FROM mysql.user WHERE User='$USER'" 2>/dev/null | grep -q "$USER"; then
+        sudo mariadb -e "CREATE USER '$USER'@'localhost' IDENTIFIED BY ''; GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>/dev/null || true
+    fi
+    step_ok "MariaDB"
+else
+    step_fail "MariaDB"
 fi
 
 # ---------------------------------------------------------------
-#  12. UFW firewall
+#  11. UFW firewall
 # ---------------------------------------------------------------
-log "  -> UFW firewall"
-sudo ufw --force enable 2>/dev/null || true
-sudo ufw default deny incoming 2>/dev/null || true
-sudo ufw default allow outgoing 2>/dev/null || true
-sudo ufw allow 22/tcp 2>/dev/null || true   # SSH
-sudo ufw allow 80/tcp 2>/dev/null || true   # HTTP
-sudo ufw allow 443/tcp 2>/dev/null || true  # HTTPS
-sudo systemctl enable --now ufw 2>/dev/null || true
-log "  UFW enabled: deny incoming, allow outgoing, ports 22/80/443 open"
+log "  -> UFW"
+if sudo ufw --force enable 2>/dev/null && \
+   sudo ufw default deny incoming 2>/dev/null && \
+   sudo ufw default allow outgoing 2>/dev/null && \
+   sudo ufw allow 22/tcp 2>/dev/null && \
+   sudo ufw allow 80/tcp 2>/dev/null && \
+   sudo ufw allow 443/tcp 2>/dev/null; then
+    sudo systemctl enable --now ufw 2>/dev/null || true
+    step_ok "UFW"
+else
+    step_fail "UFW"
+fi
 
 # ---------------------------------------------------------------
-#  13. plocate — updatedb
+#  12. plocate — updatedb
 # ---------------------------------------------------------------
-log "  -> plocate database"
+log "  -> plocate"
 sudo updatedb 2>/dev/null || true
 if [[ ! -f /etc/systemd/system/updatedb.timer ]]; then
     sudo tee /etc/systemd/system/updatedb.timer >/dev/null <<'EOF'
@@ -310,66 +345,72 @@ Type=oneshot
 ExecStart=/usr/bin/updatedb
 EOF
     sudo systemctl enable --now updatedb.timer 2>/dev/null || true
-    log "  weekly updatedb timer enabled"
 fi
+step_ok "plocate"
 
 # ---------------------------------------------------------------
-#  14. Misc: bashrc, user dirs, default wallpaper
+#  13. Misc: bashrc, user dirs, default wallpaper
 # ---------------------------------------------------------------
 log "Installing bashrc, user directories, wallpaper..."
 
-# Install repo bashrc (no backup — repo is the source of truth)
 if [[ -f "$SCRIPT_DIR/bashrc" ]]; then
     cp "$SCRIPT_DIR/bashrc" "$HOME/.bashrc"
     log "  installed ~/.bashrc from repo (aliases + eza icons)"
 fi
 
-# Standard user directories (GTK file managers icon them via xdg-user-dirs)
 for d in Downloads Documents Music Pictures Videos Projects; do
     mkdir -p "$HOME/$d"
 done
 command -v xdg-user-dirs-update >/dev/null 2>&1 && xdg-user-dirs-update 2>/dev/null || true
-log "  created ~/Downloads ~/Documents ~/Music ~/Pictures ~/Videos ~/Projects"
 
-# Default wallpaper (black.png)
 mkdir -p "$HOME/Pictures/Wallpapers"
 if [[ -d "$SCRIPT_DIR/wallpapers" ]]; then
     cp -n "$SCRIPT_DIR/wallpapers/"*.png "$HOME/Pictures/Wallpapers/" 2>/dev/null || true
-    log "  staged black.png wallpaper in ~/Pictures/Wallpapers/"
 fi
 CACHE_FILE="$DEST/scripts/.current_wallpaper"
 if [[ ! -f "$CACHE_FILE" ]]; then
     echo "$HOME/Pictures/Wallpapers/black.png" > "$CACHE_FILE"
-    log "  default black wallpaper staged — it will apply on first Hyprland start"
+fi
+step_ok "bashrc + directories + wallpaper"
+
+# ---------------------------------------------------------------
+#  14. Final summary
+# ---------------------------------------------------------------
+printf "\n"
+if [[ ${#FAILED[@]} -eq 0 ]]; then
+    printf "${GRN}════════════════════════════════════════${RST}\n"
+    printf "${GRN}  ✓ Installation complete! All OK.${RST}\n"
+    printf "${GRN}════════════════════════════════════════${RST}\n"
+else
+    printf "${YLW}════════════════════════════════════════${RST}\n"
+    printf "${YLW}  ⚠ Installation complete with ${#FAILED[@]} failure(s):${RST}\n"
+    for f in "${FAILED[@]}"; do
+        printf "${RED}    ✗ $f${RST}\n"
+    done
+    printf "${YLW}════════════════════════════════════════${RST}\n"
+    printf "\n"
+    printf "${YLW}Re-run the installer to fix failed steps:${RST}\n"
+    printf "  ${CYN}./install.sh${RST}\n"
 fi
 
-# ---------------------------------------------------------------
-#  11. Done
-# ---------------------------------------------------------------
+printf "\n"
 cat <<EOF
-
-${GRN}Installation complete!${RST}
-
 Next steps:
-  1. Reload the shell (source ~/.bashrc) — aliases + eza icons + prompt from repo's bashrc
-  2. Log out, switch to sddm, log back in
-  3. A default wallpaper (black.png) is already staged — it applies on
-     first Hyprland start. Drop your own images into ~/Pictures/Wallpapers/
-     and use SUPER+W (random) / SUPER+SHIFT+W (picker) to switch.
-  4. User directories are ready: ~/Downloads ~/Documents ~/Music ~/Pictures
-     ~/Videos ~/Projects (folder icons show in file managers and terminal via eza)
+  1. Reload the shell (${CYN}source ~/.bashrc${RST})
+  2. Log out, log in from SDDM
+  3. Use ${CYN}SUPER+W${RST} (random) / ${CYN}SUPER+SHIFT+W${RST} (picker) for wallpapers
+
+Quick commands:
+  ${CYN}fetch${RST}             — 3D spinning logo
+  ${CYN}nix develop${RST}       — dev shell (type 'exit' to leave)
+  ${CYN}locate <name>${RST}     — find files
+  ${CYN}sudo ufw status${RST}   — check firewall
+  ${CYN}psql${RST}              — PostgreSQL
+  ${CYN}mariadb${RST}           — MariaDB
 
 Notes:
-  * Requires Hyprland >= 0.55 (config uses the Lua API)
-  * Recolor everything after a wallpaper change: run wallpaper.sh
-    (SUPER+W random, SUPER+SHIFT+W picker)
-  * SDDM theme will mirror your current wallpaper automatically
-    (post_hook runs sddm-sync.sh via the sudoers rule above)
-  * Both paru and yay are installed; use whichever you prefer.
-  * Nix: run 'nix develop' in ~/dots for dev shell (node, python, go, rust, etc.)
-  * voxtype daemon is enabled — runs on login for push-to-talk dictation
-  * fetch (3D spinning logo) is installed to ~/.local/bin/fetch
-  * PostgreSQL + MariaDB: user '$USER' has full access (no sudo needed)
-  * UFW firewall enabled: deny incoming, allow outgoing, ports 22/80/443
-  * plocate: updatedb runs weekly, use 'locate' to find files
+  * Requires Hyprland >= 0.55
+  * SDDM mirrors your wallpaper automatically
+  * Both paru and yay installed
+  * voxtype daemon runs on login (push-to-talk dictation)
 EOF

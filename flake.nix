@@ -16,24 +16,11 @@
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              gcc
-              gnumake
-              pkg-config
               python3
-              sqlite
-              git
-              curl
-              jq
-              ripgrep
-              fd
-              eza
-              bat
-              fzf
-              neovim
             ];
 
             shellHook = ''
-              echo "dots dev shell active"
+              echo "dots dev shell — run your test, then type 'exit' to leave"
             '';
           };
         }
