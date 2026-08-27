@@ -282,12 +282,28 @@ if command -v voxtype >/dev/null 2>&1; then
         warn "  added $USER to the 'input' group — re-login for evdev hotkeys"
     fi
     sudo voxtype setup gpu --enable 2>/dev/null || true
-    # note: --download WITHOUT --model downloads the Whisper model from
-    # config.toml ([whisper] model). Passing --model here resolves against
-    # all engines (e.g. 'small' also matches SenseVoice) — voxtype-bin is
-    # built without the sensevoice feature, so keep it at plain --download.
-    voxtype setup --download --quiet 2>/dev/null || \
-        warn "  model download failed (run: voxtype setup --download)"
+    # Download the Whisper model with visible progress (HuggingFace
+    # whisper.cpp mirror — identical to what voxtype itself pulls).
+    # 'voxtype setup --download --quiet' is silent, so use curl here.
+    MODEL_DIR="$HOME/.local/share/voxtype/models"
+    MODEL_FILE="ggml-small.bin"
+    mkdir -p "$MODEL_DIR"
+    if [[ ! -f "$MODEL_DIR/$MODEL_FILE" ]]; then
+        log "  -> downloading Whisper $MODEL_FILE (465 MB) from HuggingFace..."
+        if curl -fL --retry 3 --progress-bar \
+            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$MODEL_FILE" \
+            -o "$MODEL_DIR/$MODEL_FILE.part"; then
+            mv "$MODEL_DIR/$MODEL_FILE.part" "$MODEL_DIR/$MODEL_FILE"
+            step_ok "whisper model ($MODEL_FILE)"
+        else
+            rm -f "$MODEL_DIR/$MODEL_FILE.part"
+            warn "  direct download failed — falling back to voxtype"
+            voxtype setup --download 2>/dev/null || \
+                warn "  model download failed (run: voxtype setup --download)"
+        fi
+    else
+        log "  -> Whisper model already present ($MODEL_FILE)"
+    fi
     voxtype setup vad 2>/dev/null || true
     step_ok "voxtype (gpu + models)"
 else
