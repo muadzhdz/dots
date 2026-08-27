@@ -94,9 +94,8 @@ AUR_PKGS=(
     redhat-fonts
 )
 
-AUR_PKGS_INTERACTIVE=(
-    voxtype-bin
-)
+# voxtype package selected dynamically after GPU detection in section 4
+AUR_PKGS_INTERACTIVE=()
 
 # ---------------------------------------------------------------
 #  3. AUR helper (install BOTH paru and yay)
@@ -134,6 +133,27 @@ else
 fi
 
 log "[2/6] Installing AUR packages..."
+
+# Detect GPU → pick the right voxtype package
+log "Detecting GPU..."
+GPU_VENDOR="unknown"
+if lspci 2>/dev/null | grep -qi nvidia; then
+    GPU_VENDOR="nvidia"
+    VOXTYPE_PKG="voxtype-cuda"
+    warn "  NVIDIA GPU detected — voxtype-cuda (CUDA). Ensure nvidia-dkms + DRM modesetting."
+elif lspci 2>/dev/null | grep -qi 'amd\|radeon\|ati'; then
+    GPU_VENDOR="amd"
+    VOXTYPE_PKG="voxtype-bin"
+    log "  AMD GPU detected — voxtype-bin (Vulkan)."
+elif lspci 2>/dev/null | grep -qi 'intel\|integrated\|i915'; then
+    GPU_VENDOR="intel"
+    VOXTYPE_PKG="voxtype-bin"
+    log "  Intel GPU detected — voxtype-bin (Vulkan/CPU)."
+else
+    VOXTYPE_PKG="voxtype-bin"
+    log "  GPU not detected — voxtype-bin (CPU inference)."
+fi
+
 # Install non-interactive AUR packages first
 if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
     if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"; then
@@ -143,26 +163,17 @@ if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
     fi
 fi
 
-# voxtype: use voxtype-bin (precompiled — source build takes very long).
+# voxtype: package depends on GPU (cuda for NVIDIA, bin for AMD/Intel/other).
 # Installed separately since it's a multi-provider AUR package
 # (prompt would block --noconfirm in the combined install).
-log "  -> voxtype"
+AUR_PKGS_INTERACTIVE=("$VOXTYPE_PKG")
+log "  -> voxtype ($VOXTYPE_PKG)"
 if [[ ${#AUR_PKGS_INTERACTIVE[@]} -gt 0 ]]; then
     if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS_INTERACTIVE[@]}"; then
         step_ok "voxtype"
     else
         step_fail "voxtype"
     fi
-fi
-
-# Hardware check (GPU / Platform)
-log "Detecting hardware platform..."
-if lspci 2>/dev/null | grep -qi nvidia; then
-    warn "  NVIDIA GPU detected. Ensure nvidia-dkms and proper DRM modesetting are enabled."
-elif lspci 2>/dev/null | grep -qi 'amd\|radeon'; then
-    log "  AMD GPU detected."
-elif lspci 2>/dev/null | grep -qi intel; then
-    log "  Intel GPU detected."
 fi
 
 # ---------------------------------------------------------------
