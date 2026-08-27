@@ -131,18 +131,6 @@ fi
 
 log "[2/6] Installing AUR packages..."
 
-# Detect GPU (informational — arch-appropriate driver notes)
-log "Detecting GPU..."
-if lspci 2>/dev/null | grep -qi nvidia; then
-    warn "  NVIDIA GPU detected. Ensure nvidia-dkms and proper DRM modesetting are enabled."
-elif lspci 2>/dev/null | grep -qi 'amd\|radeon\|ati'; then
-    log "  AMD GPU detected."
-elif lspci 2>/dev/null | grep -qi 'intel\|integrated\|i915'; then
-    log "  Intel GPU detected."
-else
-    log "  GPU not detected."
-fi
-
 # Install AUR packages
 if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
     if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS[@]}"; then
