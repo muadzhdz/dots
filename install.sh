@@ -211,17 +211,6 @@ sudo systemctl enable --now iwd 2>/dev/null || true
 sudo systemctl enable --now bluetooth 2>/dev/null || true
 sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
 
-# routerd (software AP / router) — unit + NetworkManager keyfile, disabled
-# by default: user enables it manually when needed. Config (/etc/routerd.conf)
-# is not shipped here — copy routerd/routerd.conf.example as a starting point.
-if [[ -f "$SCRIPT_DIR/systemd/system/routerd.service" ]]; then
-    sudo cp "$SCRIPT_DIR/systemd/system/routerd.service" /etc/systemd/system/routerd.service
-fi
-if [[ -f "$SCRIPT_DIR/NetworkManager/conf.d/90-routerd.conf" ]]; then
-    sudo mkdir -p /etc/NetworkManager/conf.d
-    sudo cp "$SCRIPT_DIR/NetworkManager/conf.d/90-routerd.conf" /etc/NetworkManager/conf.d/90-routerd.conf
-fi
-
 # ---------------------------------------------------------------
 #  9. SDDM (theme + config + sudoers for wallpaper sync)
 # ---------------------------------------------------------------
