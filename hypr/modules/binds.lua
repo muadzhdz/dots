@@ -2,29 +2,28 @@
 ---- MY PROGRAMS ----
 ---------------------
 
--- Set programs that you use
-local terminal    = "kitty"
-local fileManager = "nautilus"
+local terminal       = "kitty"
+local fileManager    = "nautilus"
 local scriptsDir     = os.getenv("HOME") .. "/.config/scripts"
 local launcher       = scriptsDir .. "/launcher.sh"
-local powerMenu   = scriptsDir .. "/powermenu.sh"
-local emojiPicker = scriptsDir .. "/emoji.sh"
-local screenshot  = scriptsDir .. "/screenshot.sh"
-local ocr         = scriptsDir .. "/ocr.sh"
-local clipRofi    = scriptsDir .. "/clipboard_rofi.sh"
+local powerMenu      = scriptsDir .. "/powermenu.sh"
+local emojiPicker    = scriptsDir .. "/emoji.sh"
+local screenshot     = scriptsDir .. "/screenshot.sh"
+local ocr            = scriptsDir .. "/ocr.sh"
+local clipRofi       = scriptsDir .. "/clipboard_rofi.sh"
 local monitorScaling = scriptsDir .. "/monitor-scaling.sh"
 local displayMenu    = scriptsDir .. "/display.sh"
 local wallpaper      = scriptsDir .. "/wallpaper.sh"
 local wallpaperPicker = scriptsDir .. "/wallpaper-picker.sh"
+local themeScript    = scriptsDir .. "/theme.sh"
 local lock           = "hyprlock"
 
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
 
-local mainMod = "SUPER" -- Sets "Windows" key as main modifier
+local mainMod = "SUPER"
 
--- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(lock), { locked = true })
 hl.bind(mainMod .. " + SPACE",       hl.dsp.exec_cmd(launcher .. " right"), { description = "App Launcher (sidebar kanan, slide dari kiri)" })
@@ -47,7 +46,8 @@ hl.bind(mainMod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd("bash " .. scriptsDir .
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(scriptsDir .. "/webapp-installer.sh"), { description = "Web Apps Manager" })
 hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd(scriptsDir .. "/default-browser.sh"),    { description = "Default Browser Switcher" })
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("gtk-launch \"$(xdg-settings get default-web-browser 2>/dev/null || echo firefox.desktop)\""), { description = "Default Browser" })
-hl.bind(mainMod .. " + CTRL + B",  hl.dsp.exec_cmd("bash " .. scriptsDir .. "/border-mode.sh menu"), { description = "Border Mode" })
+hl.bind(mainMod .. " + CTRL + T",  hl.dsp.exec_cmd("bash " .. themeScript .. " menu"),   { description = "Theme Menu (Monochrome Dark / Light)" })
+hl.bind(mainMod .. " + ALT + T",   hl.dsp.exec_cmd("bash " .. themeScript .. " toggle"), { description = "Toggle Theme (Dark / Light)" })
 hl.bind(mainMod .. " + ALT + A",   hl.dsp.exec_cmd(scriptsDir .. "/audio-switcher.sh sink"),   { description = "Audio Output Switcher" })
 hl.bind(mainMod .. " + ALT + SHIFT + A", hl.dsp.exec_cmd(scriptsDir .. "/audio-switcher.sh source"), { description = "Audio Input (Mic) Switcher" })
 
@@ -61,7 +61,6 @@ hl.bind("F9", hl.dsp.exec_cmd("voxtype record start"), { description = "Start di
 hl.bind("F9", hl.dsp.exec_cmd("voxtype record stop"),  { release = true, description = "Stop dictation (push-to-talk)" })
 hl.bind(mainMod .. " + CTRL + X", hl.dsp.exec_cmd("voxtype record toggle"), { description = "Toggle Dictation" })
 local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
--- closeWindowBind:set_enabled(false)
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
@@ -96,12 +95,12 @@ hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.swap({ direction = "d" }))
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
 for i = 1, 10 do
     local key = i % 10 -- 10 maps to key 0
-    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
+    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i }))
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
--- Special workspace (scratchpad) — animasi slide mengikuti posisi waybar
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"), { description = "Scratchpad (slide berlawanan arah dengan sisi waybar)" })
+-- Special workspace (scratchpad)
+hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"), { description = "Scratchpad" })
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Scroll through existing workspaces with mainMod + scroll
@@ -117,12 +116,11 @@ hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("swayosd-client --output-volume 
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("swayosd-client --output-volume lower"),       { locked = true, repeating = true })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("swayosd-client --output-volume mute-toggle"), { locked = true, repeating = true })
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("swayosd-client --brightness raise"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("swayosd-client --brightness lower"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd(scriptsDir .. "/brightness.sh raise"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd(scriptsDir .. "/brightness.sh lower"), { locked = true, repeating = true })
 
 -- Requires playerctl
 hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
-

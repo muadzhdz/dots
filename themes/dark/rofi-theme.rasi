@@ -1,0 +1,12 @@
+* {
+    primary:               #ffffff;
+    on-primary:            #000000;
+    surface-dim:           #000000;
+    surface-dim-alpha:     #000000;
+    surface-container:     #111111;
+    surface-container-high:#222222;
+    on-surface:            #ffffff;
+    on-surface-variant:    #888888;
+    error-container:       #333333;
+    on-error-container:    #ffffff;
+}

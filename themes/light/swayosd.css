@@ -1,0 +1,60 @@
+window#osd {
+  border-radius: 0;
+  border: 1px solid #cccccc;
+  background-color: #ffffff;
+  background: #ffffff;
+}
+
+window#osd #container {
+  margin: 16px;
+}
+
+window#osd image,
+window#osd label {
+  color: #000000;
+}
+
+window#osd image {
+  -gtk-icon-size: 24px;
+}
+
+window#osd label {
+  font-size: 14px;
+}
+
+window#osd progressbar:disabled,
+window#osd image:disabled {
+  opacity: 0.5;
+}
+
+window#osd progressbar,
+window#osd segmentedprogress {
+  min-height: 6px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+window#osd trough,
+window#osd segment {
+  min-height: 6px;
+  border-radius: 0;
+  border: none;
+  background: #e0e0e0;
+}
+
+window#osd progress,
+window#osd segment.active {
+  min-height: 6px;
+  border-radius: 0;
+  border: none;
+  background: #000000;
+}
+
+window#osd segment {
+  margin-left: 8px;
+}
+
+window#osd segment:first-child {
+  margin-left: 0;
+}

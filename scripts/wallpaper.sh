@@ -29,12 +29,6 @@ set_wallpaper() {
         "$img"
 
     echo "$img" > "$CACHE_FILE"
-
-    matugen image "$img" -q --config "$HOME/.config/matugen/matugen.toml" --prefer darkness >/dev/null 2>&1 || true
-
-    # Waybar is never touched here — it stays completely still while the
-    # wallpaper changes (no reload, no recolor). The new matugen waybar.css
-    # is picked up the next time the bar is (re)started via waybar-hide.sh.
 }
 
 cmd_init() {

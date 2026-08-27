@@ -1,0 +1,2 @@
+MATUGEN_ACTIVE_BORDER = "rgba(ffffffff)"
+MATUGEN_INACTIVE_BORDER = "rgba(333333ff)"

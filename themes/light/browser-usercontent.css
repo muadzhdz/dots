@@ -1,0 +1,62 @@
+/* ==========================================================================
+   Firefox & Zen — 1:1 Chromium Match New Tab Page (Light Mode)
+   ========================================================================== */
+
+@-moz-document url("about:home"), url("about:newtab"), url("about:blank"), url-prefix("about:") {
+  body,
+  #root,
+  .activity-stream,
+  .outer-wrapper {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .search-wrapper .search-inner-wrapper,
+  .search-handoff-button {
+    background-color: #f1f3f4 !important;
+    background: #f1f3f4 !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 24px !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+  }
+
+  .search-handoff-button:hover,
+  .search-wrapper .search-inner-wrapper:hover {
+    background-color: #ffffff !important;
+    border-color: #cccccc !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  }
+
+  .search-handoff-button .fake-textbox,
+  .search-wrapper input {
+    color: #000000 !important;
+  }
+
+  .search-wrapper input::placeholder,
+  .search-handoff-button .fake-textbox::placeholder {
+    color: #888888 !important;
+  }
+
+  .top-site-outer .top-site-button {
+    background-color: #f1f3f4 !important;
+    color: #000000 !important;
+  }
+
+  .top-site-outer .title {
+    color: #000000 !important;
+  }
+
+  .card-outer {
+    background-color: #f5f5f5 !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #000000 !important;
+  }
+
+  .section-title span,
+  .wordmark {
+    fill: #000000 !important;
+    color: #000000 !important;
+  }
+}

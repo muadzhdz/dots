@@ -1,0 +1,119 @@
+/* Pure Monochrome Light Qt Styling */
+QWidget {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+QDialog, QMainWindow {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* Tab bar */
+QTabWidget::pane {
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+}
+
+QTabBar::tab {
+    background-color: #f5f5f5;
+    color: #666666;
+    border: 1px solid #e0e0e0;
+    border-bottom: 2px solid transparent;
+    padding: 6px 16px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:hover {
+    background-color: #eaeaea;
+    color: #000000;
+}
+
+QTabBar::tab:selected {
+    background-color: #e0e0e0;
+    color: #000000;
+    border-bottom: 2px solid #000000;
+    font-weight: bold;
+}
+
+/* Input fields */
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background-color: #f8f8f8;
+    color: #000000;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 6px 10px;
+    selection-background-color: #e0e0e0;
+    selection-color: #000000;
+}
+
+QLineEdit:focus {
+    border: 1px solid #000000;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #f5f5f5;
+    color: #000000;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 6px 16px;
+    min-height: 20px;
+}
+
+QPushButton:hover {
+    background-color: #e5e5e5;
+    border-color: #999999;
+}
+
+QPushButton:pressed {
+    background-color: #d5d5d5;
+}
+
+/* List views and Tree views */
+QListView, QTreeView, QListWidget, QTreeWidget {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #e0e0e0;
+}
+
+QListView::item:selected, QTreeView::item:selected, QListWidget::item:selected {
+    background-color: #e0e0e0;
+    color: #000000;
+}
+
+QListView::item:hover:not(:selected), QListWidget::item:hover:not(:selected) {
+    background-color: #f5f5f5;
+}
+
+/* Checkbox and Radio */
+QCheckBox, QRadioButton {
+    color: #000000;
+}
+
+QCheckBox::indicator, QRadioButton::indicator {
+    border: 1px solid #aaaaaa;
+    background: #ffffff;
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+}
+
+QCheckBox::indicator:checked {
+    background: #000000;
+}
+
+/* Scrollbars */
+QScrollBar:vertical, QScrollBar:horizontal {
+    background: #ffffff;
+    border: none;
+}
+
+QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+    background: #e0e0e0;
+    border-radius: 3px;
+}
+
+QScrollBar::handle:hover {
+    background: #cccccc;
+}

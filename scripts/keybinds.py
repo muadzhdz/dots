@@ -20,6 +20,7 @@ EXEC_LABELS = {
     "displayMenu": "Display Settings",
     "wallpaper": "Random Wallpaper",
     "wallpaperPicker": "Wallpaper Picker",
+    "themeMode": "Theme Mode Switcher",
     "lock": "Lock Screen",
 }
 
@@ -27,6 +28,7 @@ EXEC_LABELS = {
 def describe_exec(cmd):
     low = cmd.lower()
     table = [
+        ("theme-mode", "Theme Mode Switcher"),
         ("power-menu", "Power Menu"),
         ("--output-volume raise", "Volume Up"),
         ("--output-volume lower", "Volume Down"),

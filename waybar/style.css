@@ -1,25 +1,15 @@
-@import url("../matugen/generated/waybar.css");
+@import url("colors.css");
 
 window#waybar {
-  background-color: alpha(@surface, 0.55);
+  background-color: @bar-bg;
   border: none;
 }
 
-/* Position-aware rounded corners */
-window#waybar.top {
-  border-radius: 0 0 8px 8px;
-}
-
-window#waybar.bottom {
-  border-radius: 8px 8px 0 0;
-}
-
-window#waybar.left {
-  border-radius: 0 8px 8px 0;
-}
-
+window#waybar.top,
+window#waybar.bottom,
+window#waybar.left,
 window#waybar.right {
-  border-radius: 8px 0 0 8px;
+  border-radius: 0;
 }
 
 * {
@@ -30,7 +20,6 @@ window#waybar.right {
   font-size: 13px;
 }
 
-/* Horizontal Layout (Top & Bottom) */
 window#waybar.top *,
 window#waybar.bottom * {
   min-height: 35px;
@@ -46,7 +35,6 @@ window#waybar.bottom .modules-right {
   margin-right: 20px;
 }
 
-/* Vertical Layout (Left & Right) */
 window#waybar.left *,
 window#waybar.right * {
   min-height: 0;
@@ -67,8 +55,6 @@ window#waybar.right .modules-right {
   margin-right: 0;
 }
 
-/* Reset semua margin horizontal saat posisi kiri/kanan,
-   ganti dengan margin vertikal supaya icon tetap center */
 window#waybar.left #cpu,
 window#waybar.left #battery,
 window#waybar.left #pulseaudio,
@@ -90,7 +76,6 @@ window#waybar.right #custom-arch {
   min-width: 0;
 }
 
-/* Tray di vertikal — spacing jadi row bukan column */
 window#waybar.left #tray,
 window#waybar.right #tray {
   margin: 4px 0;
@@ -115,7 +100,7 @@ window#waybar.right #workspaces button {
 }
 
 #workspaces button.empty {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 #cpu,
@@ -137,7 +122,6 @@ window#waybar.right #workspaces button {
   margin-right: 13px;
 }
 
-/* Override margin horizontal jadi 0 saat posisi vertikal */
 window#waybar.left #cpu,
 window#waybar.left #battery,
 window#waybar.left #pulseaudio,
@@ -156,6 +140,9 @@ window#waybar.right #network {
 
 tooltip {
   padding: 2px;
+  background-color: @surface;
+  border: 1px solid @border-col;
+  color: @on-surface;
 }
 
 #clock {

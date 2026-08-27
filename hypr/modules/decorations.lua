@@ -2,60 +2,54 @@
 ---- LOOK AND FEEL ----
 -----------------------
 
--- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
+-- Pure Monochrome Configuration (Dark / Light) - No Border Radius (Sharp 0)
 
-pcall(dofile, os.getenv("HOME") .. "/.config/matugen/generated/hyprland-border-colors.lua")
-
-local border_mode_file = io.open(os.getenv("HOME") .. "/.config/scripts/.border-mode", "r")
-local no_border = false
-if border_mode_file then
-    no_border = border_mode_file:read("*l") == "noborder"
-    border_mode_file:close()
+local theme_file = io.open(os.getenv("HOME") .. "/.config/scripts/.theme", "r")
+local theme = "dark"
+if theme_file then
+    theme = theme_file:read("*l") or "dark"
+    theme_file:close()
 end
+
+local is_dark = (theme ~= "light")
+local active_border_col = is_dark and "rgba(ffffffff)" or "rgba(000000ff)"
+local inactive_border_col = is_dark and "rgba(333333ff)" or "rgba(ccccccff)"
 
 hl.config({
     general = {
         gaps_in  = 10,
         gaps_out = 15,
 
-        border_size = 0,
+        border_size = 1,
 
         col = {
-            active_border   = { colors = {MATUGEN_ACTIVE_BORDER or "rgba(33ccffee)"}},
-            inactive_border = MATUGEN_INACTIVE_BORDER or "rgba(595959aa)",
+            active_border   = { colors = {active_border_col} },
+            inactive_border = inactive_border_col,
         },
 
-        -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
         resize_on_border = true,
-
-        -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
         allow_tearing = false,
     },
 
     decoration = {
-        rounding       = no_border and 0 or 10,
+        rounding       = 0,
         rounding_power = 2,
 
-        -- Change transparency of focused and unfocused windows
-        active_opacity   = 0.65,
-        inactive_opacity = 0.65,
+        active_opacity   = 1.0,
+        inactive_opacity = 1.0,
 
-        -- Dim/backdrop the main workspace when a special workspace is open
-        dim_special = 0.35,
+        dim_special = 0.45,
 
         shadow = {
-            enabled      = true,
-            range        = 20,
-            render_power = 3,
-            color        = 0xee121212,
+            enabled      = false,
         },
 
         blur = {
             enabled   = true,
             size      = 10,
-            passes    = 2,
+            passes    = 3,
             vibrancy  = 0.1696,
-            special   = true,
+            special   = true, -- Backdrop blur for special workspace (scratchpad)
         },
     },
 
@@ -64,7 +58,6 @@ hl.config({
     },
 })
 
--- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
 hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
 hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } })
 hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })

@@ -1,12 +1,15 @@
 #
-# ~/.bashrc
+# ~/.bashrc - Pure Monochrome (Strictly Black & White)
 #
 
-# If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# Source active theme environment if present
+if [[ -f "$HOME/.config/themes/active-env.sh" ]]; then
+    source "$HOME/.config/themes/active-env.sh"
+fi
+
 # eza — ls replacement with Nerd Font icons
-# (requires eza + a Nerd Font such as ttf-jetbrains-mono-nerd)
 alias ls='eza -lh --group-directories-first --icons=auto'
 alias lsa='eza -lah --group-directories-first --icons=auto'
 alias lt='eza --tree --level=2 --icons=auto'
@@ -17,8 +20,6 @@ alias grep='grep --color=auto'
 _PS1_BASE='\w ❯ '
 PS1='\w ❯ '
 
-# Report cwd to the terminal (OSC 7, format kitty) so new kitty tabs/windows
-# (ctrl+shift+t / ctrl+shift+n) open in the current directory.
 function _osc7 {
     if [[ $TERM = *xterm* || $TERM = *kitty* || $TERM = *ghostty* ]]; then
         printf '\e]7;kitty-shell-cwd://%s%s\a' "${HOSTNAME:-}" "$(pwd)"
@@ -26,14 +27,10 @@ function _osc7 {
 }
 PROMPT_COMMAND="_osc7${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
-# Prompt indicators — venv-style markers:
-#  nix: IN_NIX_SHELL set by `nix develop`/`nix shell`/nix-shell,
-#       label from the devShell $name, falling back to $PWD;
-#  git: branch + uncommitted change counters (file/folder icons).
-_nix_dev_icon=$'\uf313'   # Nerd Font nf-linux-nixos
-_git_icon=$'\ue0a0'       # Nerd Font powerline branch
-_file_icon=$'\uf15b'      # Nerd Font fa-file
-_folder_icon=$'\uf07b'    # Nerd Font fa-folder
+_nix_dev_icon=$'\uf313'
+_git_icon=$'\ue0a0'
+_file_icon=$'\uf15b'
+_folder_icon=$'\uf07b'
 _update_prompt() {
     local _NIX_PRE="" _GIT_PRE=""
 
@@ -55,7 +52,7 @@ _update_prompt() {
                 fi
             fi
         fi
-        _NIX_PRE="\[\e[1;32m\]( ${_nix_dev_icon} ${_NIX_DEV_LABEL} )\[\e[0m\] "
+        _NIX_PRE="\[\e[1m\]( ${_nix_dev_icon} ${_NIX_DEV_LABEL} )\[\e[0m\] "
     fi
 
     local st br file_count dir_count dirty_count line path
@@ -86,7 +83,7 @@ _update_prompt() {
                 (( file_count > 0 )) && dirty_count+=" ${_file_icon} ${file_count}"
                 (( dir_count > 0 ))  && dirty_count+=" ${_folder_icon} ${dir_count}"
             fi
-            _GIT_PRE="\[\e[1;35m\]( ${_git_icon} ${br}${dirty_count} )\[\e[0m\] "
+            _GIT_PRE="\[\e[1m\]( ${_git_icon} ${br}${dirty_count} )\[\e[0m\] "
         fi
     fi
 
@@ -94,14 +91,6 @@ _update_prompt() {
 }
 PROMPT_COMMAND="_update_prompt${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
-# opencode
-export PATH=/home/muadzhdz/.opencode/bin:$PATH
-
-
-# Added by Antigravity CLI installer
+export PATH="/home/muadzhdz/.opencode/bin:$PATH"
 export PATH="/home/muadzhdz/.local/bin:$PATH"
-
-# Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/muadzhdz/.lmstudio/bin"
-# End of LM Studio CLI section
-

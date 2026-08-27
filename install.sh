@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------
-#  dots installer — Hyprland rice with matugen Material You theming
+#  dots installer — Hyprland rice with Material You theming
 #  Requires: Arch Linux (or derivative) with sudo
 #  Usage:    ./install.sh
 # ---------------------------------------------------------------
@@ -37,7 +37,7 @@ OFFICIAL_PKGS=(
     jq playerctl pamixer btop cava qt6ct
     bluez bluez-utils iwd sddm
     polkit-kde-agent bluetui wiremix impala
-    matugen swayosd awww
+    swayosd awww
     hyprpicker tesseract tesseract-data-eng libnotify bc nautilus
     brightnessctl
     wl-clipboard wtype wireplumber pipewire-pulse
@@ -59,6 +59,7 @@ AUR_PKGS=(
     helium-browser-bin
     tor-browser-bin
     visual-studio-code-bin
+    voxtype
 )
 
 # ---------------------------------------------------------------
@@ -144,7 +145,7 @@ fi
 BACKUP_DIR="$HOME/.config.backup-$(date +%Y%m%d_%H%M%S)"
 log "[3/7] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
 mkdir -p "$BACKUP_DIR"
-for item in hypr matugen scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim voxtype fastfetch Kvantum; do
+for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim voxtype Kvantum; do
     if [[ -d "$DEST/$item" ]]; then
         cp -r "$DEST/$item" "$BACKUP_DIR/" 2>/dev/null || true
     fi
@@ -156,7 +157,6 @@ copy_to() { # $1=src  $2=dst
     cp -r "$SCRIPT_DIR/$1/." "$DEST/$2/"
 }
 copy_to hypr           hypr
-copy_to matugen        matugen
 copy_to scripts        scripts
 copy_to waybar         waybar
 copy_to rofi           rofi
@@ -173,8 +173,8 @@ copy_to gtk/gtk-4.0    gtk-4.0
 copy_to obs-studio     obs-studio
 copy_to nvim           nvim
 copy_to voxtype        voxtype
-copy_to fastfetch      fastfetch
 copy_to Kvantum        Kvantum
+copy_to nix            nix
 
 chmod +x "$DEST"/scripts/*.sh 2>/dev/null || true
 
@@ -186,6 +186,22 @@ cc -O2 -o "$HOME/.local/bin/clipboard-multi" \
     "$SCRIPT_DIR/scripts/clipboard-multi/zwlr-client-protocol.c" \
     $(pkg-config --cflags --libs wayland-client)
 
+# build fetch (3D spinning distro logo)
+log "  -> fetch"
+if [[ ! -f "$HOME/.local/bin/fetch" ]]; then
+    git clone https://github.com/areofyl/fetch.git /tmp/fetch-build
+    (cd /tmp/fetch-build && make && PREFIX="$HOME/.local" make install)
+    rm -rf /tmp/fetch-build
+    log "  installed fetch to ~/.local/bin/fetch"
+else
+    log "  fetch already installed, skipping"
+fi
+
+# copy nix config (nix-command flakes)
+log "  -> nix"
+mkdir -p "$DEST/nix"
+cp "$SCRIPT_DIR/nix/nix.conf" "$DEST/nix/nix.conf"
+
 # ---------------------------------------------------------------
 #  7. User services
 # ---------------------------------------------------------------
@@ -193,6 +209,7 @@ log "[4/7] Enabling user services..."
 systemctl --user daemon-reload
 systemctl --user enable --now graphical-session.target 2>/dev/null || true
 systemctl --user enable --now swayosd-server.service 2>/dev/null || true
+systemctl --user enable --now voxtype.service 2>/dev/null || true
 
 # swayosd needs write access to /sys/class/backlight/*/brightness,
 # which is group-writable by the 'video' group (see 99-swayosd.rules).
@@ -278,25 +295,16 @@ done
 command -v xdg-user-dirs-update >/dev/null 2>&1 && xdg-user-dirs-update 2>/dev/null || true
 log "  created ~/Downloads ~/Documents ~/Music ~/Pictures ~/Videos ~/Projects"
 
-# Default wallpaper shipped with the repo so the user has one on first boot.
-# It's only applied if no wallpaper has been set yet — after that, their own
-# collection in ~/Pictures/Wallpapers/ takes over.
+# Default wallpaper (black.png)
 mkdir -p "$HOME/Pictures/Wallpapers"
-DEFAULT_WALL="$SCRIPT_DIR/wallpapers/monstera.png"
+if [[ -d "$SCRIPT_DIR/wallpapers" ]]; then
+    cp -n "$SCRIPT_DIR/wallpapers/"*.png "$HOME/Pictures/Wallpapers/" 2>/dev/null || true
+    log "  staged black.png wallpaper in ~/Pictures/Wallpapers/"
+fi
 CACHE_FILE="$DEST/scripts/.current_wallpaper"
-if [[ -f "$DEFAULT_WALL" ]]; then
-    if [[ -f "$CACHE_FILE" ]] && [[ -f "$(cat "$CACHE_FILE")" ]]; then
-        warn "  wallpaper already set — leaving ~/Pictures/Wallpapers untouched"
-    else
-        if [[ ! -f "$HOME/Pictures/Wallpapers/monstera.png" ]]; then
-            cp "$DEFAULT_WALL" "$HOME/Pictures/Wallpapers/monstera.png"
-            log "  copied default wallpaper to ~/Pictures/Wallpapers/monstera.png"
-        fi
-        echo "$HOME/Pictures/Wallpapers/monstera.png" > "$CACHE_FILE"
-        log "  default wallpaper staged — it will apply on first Hyprland start"
-    fi
-else
-    warn "  no bundled wallpaper found — run wallpaper.sh init after first boot"
+if [[ ! -f "$CACHE_FILE" ]]; then
+    echo "$HOME/Pictures/Wallpapers/black.png" > "$CACHE_FILE"
+    log "  default black wallpaper staged — it will apply on first Hyprland start"
 fi
 
 # ---------------------------------------------------------------
@@ -309,7 +317,7 @@ ${GRN}Installation complete!${RST}
 Next steps:
   1. Reload the shell (source ~/.bashrc) — aliases + eza icons + prompt from repo's bashrc
   2. Log out, switch to sddm, log back in
-  3. A default wallpaper (monstera.png) is already staged — it applies on
+  3. A default wallpaper (black.png) is already staged — it applies on
      first Hyprland start. Drop your own images into ~/Pictures/Wallpapers/
      and use SUPER+W (random) / SUPER+SHIFT+W (picker) to switch.
   4. User directories are ready: ~/Downloads ~/Documents ~/Music ~/Pictures
@@ -320,6 +328,9 @@ Notes:
   * Recolor everything after a wallpaper change: run wallpaper.sh
     (SUPER+W random, SUPER+SHIFT+W picker)
   * SDDM theme will mirror your current wallpaper automatically
-    (matugen post_hook runs sddm-sync.sh via the sudoers rule above)
+    (post_hook runs sddm-sync.sh via the sudoers rule above)
   * Both paru and yay are installed; use whichever you prefer.
+  * Nix is configured with flakes support (nix.conf backed up to dots/nix/)
+  * voxtype daemon is enabled — runs on login for push-to-talk dictation
+  * fetch (3D spinning logo) is installed to ~/.local/bin/fetch
 EOF

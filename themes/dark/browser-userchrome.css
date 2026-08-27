@@ -1,0 +1,178 @@
+/* ==========================================================================
+   Firefox & Zen — 1:1 Chromium Match (Dark Mode)
+   ========================================================================== */
+
+:root {
+  --lwt-accent-color: #000000 !important;
+  --lwt-text-color: #ffffff !important;
+  --toolbar-bgcolor: #000000 !important;
+  --toolbar-color: #ffffff !important;
+  --tab-selected-bgcolor: #1f1f1f !important;
+  --tab-selected-textcolor: #ffffff !important;
+  --urlbar-background: #111111 !important;
+  --urlbar-color: #ffffff !important;
+  --arrowpanel-background: #111111 !important;
+  --arrowpanel-color: #ffffff !important;
+  --arrowpanel-border-color: #333333 !important;
+  --autocomplete-popup-background: #111111 !important;
+  --autocomplete-popup-color: #ffffff !important;
+  --toolbar-field-background-color: #111111 !important;
+  --toolbar-field-color: #ffffff !important;
+  --toolbar-field-focus-background-color: #111111 !important;
+  --toolbar-field-focus-color: #ffffff !important;
+}
+
+#navigator-toolbox,
+#TabsToolbar,
+#titlebar,
+#toolbar-menubar {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-bottom: none !important;
+}
+
+#nav-bar,
+#PersonalToolbar {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  border-top: none !important;
+  border-bottom: 1px solid #1a1a1a !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-background,
+.tabbrowser-tab[visuallyselected="true"] .tab-background {
+  background-color: #1f1f1f !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-label,
+.tabbrowser-tab[visuallyselected="true"] .tab-label {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.tabbrowser-tab:not([selected="true"]) .tab-background {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.tabbrowser-tab:not([selected="true"]) .tab-label {
+  color: #9aa0a6 !important;
+}
+
+.tabbrowser-tab:hover:not([selected="true"]) .tab-background {
+  background-color: #141414 !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.tabbrowser-tab:hover:not([selected="true"]) .tab-label {
+  color: #e8eaed !important;
+}
+
+#urlbar,
+#searchbar {
+  --urlbar-height: 36px !important;
+  color: #ffffff !important;
+}
+
+#urlbar-background,
+#searchbar {
+  background-color: #111111 !important;
+  border: 1px solid #333333 !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+}
+
+#urlbar:not([focused="true"]) > #urlbar-background {
+  background-color: #111111 !important;
+}
+
+#urlbar[focused="true"] > #urlbar-background {
+  background-color: #111111 !important;
+  border-color: #555555 !important;
+}
+
+#urlbar[breakout][breakout-extend] {
+  top: 0px !important;
+  left: 0px !important;
+  width: 100% !important;
+}
+
+#urlbar[breakout][breakout-extend] > #urlbar-background {
+  background-color: #111111 !important;
+  border: 1px solid #333333 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+}
+
+.urlbarView {
+  background-color: #111111 !important;
+  color: #ffffff !important;
+  border-radius: 0 0 20px 20px !important;
+  border-top: 1px solid #222222 !important;
+  margin: 0 !important;
+  padding: 4px 0 !important;
+}
+
+.urlbarView-body-inner,
+.urlbarView-results {
+  background-color: #111111 !important;
+  padding: 0 !important;
+}
+
+.urlbarView-row {
+  color: #ffffff !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  margin: 2px 8px !important;
+}
+
+.urlbarView-row:hover {
+  background-color: #222222 !important;
+}
+
+.urlbarView-row[selected] {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+.urlbarView-url {
+  color: #8ab4f8 !important;
+}
+
+.urlbarView-title-separator::before {
+  color: #555555 !important;
+}
+
+#urlbar-input,
+.searchbar-textbox {
+  color: #ffffff !important;
+}
+
+menupopup,
+panel {
+  --panel-background: #111111 !important;
+  --panel-color: #ffffff !important;
+  --panel-border-color: #333333 !important;
+  background-color: #111111 !important;
+  color: #ffffff !important;
+}
+
+#zen-sidebar-top-buttons,
+#zen-sidebar-bottom-buttons,
+#sidebar-box,
+#sidebar-header {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #222222 !important;
+}
+
+toolbarbutton,
+.toolbarbutton-1,
+.tab-close-button {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}

@@ -46,7 +46,7 @@ sync_dir() { # $1=src (relative to ~/.config) $2=dst (relative to ~/dots)
 }
 
 sync_dir "hypr"           "hypr"
-sync_dir "matugen"        "matugen"
+sync_dir "themes"         "themes"
 sync_dir "scripts"        "scripts"
 sync_dir "waybar"         "waybar"
 sync_dir "rofi"           "rofi"

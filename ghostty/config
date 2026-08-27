@@ -1,4 +1,4 @@
-theme = matugen.conf
+theme = current
 custom-shader = shaders/kitty_trail.glsl
 font-size = 11
 app-notifications = no-config-reload

@@ -1,0 +1,107 @@
+@OBSThemeMeta {
+    name: 'Monochrome Light';
+    id: 'com.rice.MonochromeLight';
+    extends: 'com.obsproject.Yami';
+    author: 'Rice';
+    dark: 'false';
+}
+
+@OBSThemeVars {
+    --grey1: #e0e0e0;
+    --grey2: #e8e8e8;
+    --grey3: #f0f0f0;
+    --grey4: #f5f5f5;
+    --grey5: #fafafa;
+    --grey6: #ffffff;
+    --grey7: #ffffff;
+    --grey8: #ffffff;
+
+    --bg_window: #ffffff;
+    --bg_base: #ffffff;
+    --bg_preview: #ffffff;
+
+    --primary: #e0e0e0;
+    --primary_light: #000000;
+    --primary_lighter: #000000;
+    --primary_dark: #cccccc;
+    --primary_darker: #aaaaaa;
+
+    --blue1: #000000;
+    --blue2: #000000;
+    --blue3: #e0e0e0;
+    --blue4: #cccccc;
+    --blue5: #aaaaaa;
+    --blue6: #888888;
+
+    --text: #000000;
+    --text_light: #000000;
+    --text_muted: #555555;
+}
+
+/* Modals & Child Dialogs */
+QDialog,
+OBSBasicProperties,
+OBSBasicFilters,
+OBSBasicTransform,
+OBSBasicSettings,
+OBSBasicInteraction {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+QTabWidget::pane,
+QTabBar::tab {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+QTabBar::tab:selected {
+    background-color: #f0f0f0 !important;
+    border-bottom: 2px solid #000000 !important;
+}
+
+/* Selection and Hover Rules */
+QListView::item:selected,
+QListWidget::item:selected,
+QMenu::item:selected,
+QMenu > QWidget:selected,
+SourceTree::item:selected,
+SourceSelectButton:checked,
+SourceSelectButton QPushButton:checked {
+    background-color: #e0e0e0 !important;
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+}
+
+QListView::item:selected QLabel,
+QListWidget::item:selected QLabel,
+SourceSelectButton:checked QLabel {
+    color: #000000 !important;
+}
+
+QListView::item:hover:not(:selected),
+QListWidget::item:hover:not(:selected),
+SourceSelectButton:hover:not(:checked) {
+    background-color: #f0f0f0 !important;
+    color: #000000 !important;
+}
+
+QPushButton {
+    background-color: #f5f5f5;
+    color: #000000;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+QPushButton:hover {
+    background-color: #e5e5e5;
+    border-color: #999999;
+}
+
+QPushButton:checked {
+    background-color: #e0e0e0 !important;
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+}

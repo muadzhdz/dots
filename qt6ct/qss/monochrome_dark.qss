@@ -1,0 +1,119 @@
+/* Pure Monochrome Dark Qt Styling */
+QWidget {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+QDialog, QMainWindow {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+/* Tab bar (Fixes Screencast Picker "Screen | Window | Region" Cyan Line) */
+QTabWidget::pane {
+    border: 1px solid #222222;
+    background-color: #000000;
+}
+
+QTabBar::tab {
+    background-color: #111111;
+    color: #aaaaaa;
+    border: 1px solid #222222;
+    border-bottom: 2px solid transparent;
+    padding: 6px 16px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:hover {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+QTabBar::tab:selected {
+    background-color: #222222;
+    color: #ffffff;
+    border-bottom: 2px solid #ffffff;
+    font-weight: bold;
+}
+
+/* Polkit and Input fields (Fixes White-on-White input box) */
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background-color: #0a0a0a;
+    color: #ffffff;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    padding: 6px 10px;
+    selection-background-color: #333333;
+    selection-color: #ffffff;
+}
+
+QLineEdit:focus {
+    border: 1px solid #ffffff;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #111111;
+    color: #ffffff;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    padding: 6px 16px;
+    min-height: 20px;
+}
+
+QPushButton:hover {
+    background-color: #222222;
+    border-color: #555555;
+}
+
+QPushButton:pressed {
+    background-color: #333333;
+}
+
+/* List views and Tree views */
+QListView, QTreeView, QListWidget, QTreeWidget {
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid #222222;
+}
+
+QListView::item:selected, QTreeView::item:selected, QListWidget::item:selected {
+    background-color: #222222;
+    color: #ffffff;
+}
+
+QListView::item:hover:not(:selected), QListWidget::item:hover:not(:selected) {
+    background-color: #111111;
+}
+
+/* Checkbox and Radio */
+QCheckBox, QRadioButton {
+    color: #ffffff;
+}
+
+QCheckBox::indicator, QRadioButton::indicator {
+    border: 1px solid #555555;
+    background: #000000;
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+}
+
+QCheckBox::indicator:checked {
+    background: #ffffff;
+}
+
+/* Scrollbars */
+QScrollBar:vertical, QScrollBar:horizontal {
+    background: #000000;
+    border: none;
+}
+
+QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+    background: #222222;
+    border-radius: 3px;
+}
+
+QScrollBar::handle:hover {
+    background: #444444;
+}

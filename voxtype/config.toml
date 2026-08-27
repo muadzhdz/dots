@@ -1,12 +1,12 @@
 # Rice dictation config (voxtype)
-# English + Indonesian, Whisper small model, push-to-talk via F9
+# Multilingual (English + Indonesian), Whisper small model, push-to-talk via F9
 
 [hotkey]
 enabled = false
 
 [whisper]
 model = "small"
-language = ["en", "id"]
+language = "auto"
 
 [audio]
 device = "pipewire"
@@ -14,9 +14,13 @@ sample_rate = 16000
 max_duration_secs = 60
 
 [audio.feedback]
+enabled = false
+
+[osd]
 enabled = true
-theme = "default"
-volume = 0.7
+frontend = "gtk4"
+position = "top-center"
+waveform_gain = 8.0
 
 [output]
 mode = "type"
