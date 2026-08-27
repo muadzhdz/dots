@@ -242,6 +242,11 @@ fi
 [[ $HYPR_LUA_OK -eq 1 ]] || warn "  hypr config broken — see Hyprland log (~/\.local/state/hypr/hyprland/\.log)"
 step_ok "configs copied"
 
+# Rollback protection only covers the config-copy phase above. Later steps
+# (nix, services, databases, firewall) are independent — a failure there
+# must NOT wipe the freshly copied configs back to their pre-install state.
+trap - ERR
+
 # copy nix config (nix-command flakes, sandbox off for DNS in flake fetch)
 log "  -> fetch"
 if [[ ! -f "$HOME/.local/bin/fetch" ]]; then
@@ -261,13 +266,18 @@ fi
 log "  -> nix"
 mkdir -p "$DEST/nix"
 cp "$SCRIPT_DIR/nix/nix.conf" "$DEST/nix/nix.conf"
-sudo tee /etc/nix/nix.conf >/dev/null <<'NIXCONF'
+if sudo mkdir -p /etc/nix && sudo tee /etc/nix/nix.conf >/dev/null <<'NIXCONF'
 build-users-group = nixbld
 experimental-features = nix-command flakes
 sandbox = false
 NIXCONF
-sudo systemctl restart nix-daemon 2>/dev/null || true
-step_ok "nix config"
+then
+    sudo systemctl restart nix-daemon 2>/dev/null || true
+    step_ok "nix config"
+else
+    warn "  could not write /etc/nix/nix.conf (nix not installed yet?)"
+    step_fail "nix config"
+fi
 
 # ---------------------------------------------------------------
 #  6. User services
