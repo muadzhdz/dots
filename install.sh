@@ -450,6 +450,14 @@ CACHE_FILE="$DEST/scripts/.current_wallpaper"
 if [[ ! -f "$CACHE_FILE" ]]; then
     echo "$HOME/Pictures/Wallpapers/black.png" > "$CACHE_FILE"
 fi
+# Apply wallpaper to SDDM immediately (sudoers entry from the SDDM step).
+if [[ -x "$DEST/scripts/sddm-sync.sh" ]]; then
+    if sudo "$DEST/scripts/sddm-sync.sh" >/dev/null 2>&1; then
+        log "  SDDM background synced: $(cat "$CACHE_FILE")"
+    else
+        warn "  SDDM background sync failed (run: sudo ~/.config/scripts/sddm-sync.sh)"
+    fi
+fi
 step_ok "bashrc + directories + wallpaper"
 
 # ---------------------------------------------------------------
