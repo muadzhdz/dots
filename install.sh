@@ -158,7 +158,7 @@ fi
 BACKUP_DIR="$HOME/.config.backup-$(date +%Y%m%d_%H%M%S)"
 log "[3/6] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
 mkdir -p "$BACKUP_DIR"
-for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim Kvantum; do
+for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim Kvantum themes; do
     if [[ -d "$DEST/$item" ]]; then
         cp -r "$DEST/$item" "$BACKUP_DIR/" 2>/dev/null || true
     fi
@@ -200,12 +200,46 @@ copy_to gtk/gtk-4.0    gtk-4.0
 copy_to obs-studio     obs-studio
 copy_to nvim           nvim
 copy_to Kvantum        Kvantum
+copy_to themes         themes
 copy_to nix            nix
 
 chmod +x "$DEST"/scripts/*.sh 2>/dev/null || true
 
 # replace __HOME__ placeholder in qt6ct config
 sed -i "s|__HOME__|$HOME|g" "$DEST/qt6ct/qt6ct.conf" 2>/dev/null || true
+
+# Legacy hyprland.conf conflicts with the Lua entrypoint on Hyprland 0.55+.
+# This repo is fully Lua — drop any stale .conf from previous setups so it
+# can't shadow hyprland.lua or cause "source= globbing error".
+rm -f "$DEST/hypr/hyprland.conf"
+
+# Verify the Lua config tree copied completely (hyprland.lua + every module).
+# Copying hyprland.lua without modules/ gives "module 'modules.X' not found".
+HYPR_LUA_OK=0
+if [[ -f "$DEST/hypr/hyprland.lua" ]]; then
+    modules_ok=1
+    for m in "$DEST"/hypr/modules/*.lua; do
+        [[ -f "$m" ]] || modules_ok=0
+    done
+    if [[ $modules_ok -eq 1 ]]; then
+        if command -v luac >/dev/null 2>&1; then
+            if luac -p "$DEST/hypr/hyprland.lua" "$DEST"/hypr/modules/*.lua 2>/dev/null; then
+                step_ok "hypr lua config (modules + syntax OK)"
+                HYPR_LUA_OK=1
+            else
+                step_fail "hypr lua config (syntax error)"
+            fi
+        else
+            warn "  luac not installed — skipping lua syntax check"
+            HYPR_LUA_OK=1
+        fi
+    else
+        step_fail "hypr lua config (some modules/ files missing)"
+    fi
+else
+    step_fail "hypr lua config (hyprland.lua missing)"
+fi
+[[ $HYPR_LUA_OK -eq 1 ]] || warn "  hypr config broken — see Hyprland log (~/\.local/state/hypr/hyprland/\.log)"
 step_ok "configs copied"
 
 # copy nix config (nix-command flakes, sandbox off for DNS in flake fetch)
@@ -398,6 +432,9 @@ log "Installing bashrc, user directories, wallpaper..."
 if [[ -f "$SCRIPT_DIR/bashrc" ]]; then
     cp "$SCRIPT_DIR/bashrc" "$HOME/.bashrc"
     log "  installed ~/.bashrc from repo (aliases + eza icons)"
+    if ! bash -n "$HOME/.bashrc" 2>/dev/null; then
+        warn "  .bashrc syntax error after copy — check for stray hardcoded paths"
+    fi
 fi
 
 for d in Downloads Documents Music Pictures Videos Projects; do

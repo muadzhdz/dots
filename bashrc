@@ -91,6 +91,6 @@ _update_prompt() {
 }
 PROMPT_COMMAND="_update_prompt${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
-export PATH="/home/muadzhdz/.opencode/bin:$PATH"
-export PATH="/home/muadzhdz/.local/bin:$PATH"
-export PATH="$PATH:/home/muadzhdz/.lmstudio/bin"
+export PATH="$HOME/.opencode/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:$HOME/.lmstudio/bin"
