@@ -1,7 +1,0 @@
-# Voxtype OSD palette (Pure Monochrome Light)
-background = "#ffffff"
-foreground = "#000000"
-accent = "#000000"
-color1 = "#000000"
-color2 = "#333333"
-color3 = "#666666"

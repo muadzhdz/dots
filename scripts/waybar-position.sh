@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 CACHE_FILE="$HOME/.config/waybar/.current_position"
 CONFIG_FILE="$HOME/.config/waybar/config.jsonc"

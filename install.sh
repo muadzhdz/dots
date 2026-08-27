@@ -155,21 +155,12 @@ copy_to Kvantum        Kvantum
 copy_to nix            nix
 
 chmod +x "$DEST"/scripts/*.sh 2>/dev/null || true
+
+# replace __HOME__ placeholder in qt6ct config
+sed -i "s|__HOME__|$HOME|g" "$DEST/qt6ct/qt6ct.conf" 2>/dev/null || true
 step_ok "configs copied"
 
-# build clipboard-multi helper (image + text multi-mime clipboard)
-log "  -> clipboard-multi"
-mkdir -p "$HOME/.local/bin"
-if cc -O2 -o "$HOME/.local/bin/clipboard-multi" \
-    "$SCRIPT_DIR/scripts/clipboard-multi/clipboard-multi.c" \
-    "$SCRIPT_DIR/scripts/clipboard-multi/zwlr-client-protocol.c" \
-    $(pkg-config --cflags --libs wayland-client) 2>/dev/null; then
-    step_ok "clipboard-multi"
-else
-    step_fail "clipboard-multi"
-fi
-
-# build fetch (3D spinning distro logo)
+# copy nix config (nix-command flakes, sandbox off for DNS in flake fetch)
 log "  -> fetch"
 if [[ ! -f "$HOME/.local/bin/fetch" ]]; then
     if git clone https://github.com/areofyl/fetch.git /tmp/fetch-build 2>/dev/null && \

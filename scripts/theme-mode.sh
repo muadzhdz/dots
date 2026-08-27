@@ -73,7 +73,7 @@ apply_dark() {
     notify "Dark Mode Activated (Monochrome Black & White)"
 }
 
-chmod +x /home/muadzhdz/.config/scripts/theme.sh 2>/dev/null || true
+chmod +x "$HOME/.config/scripts/theme.sh" 2>/dev/null || true
 
 case "${1:-dark}" in
     dark)   apply_dark ;;

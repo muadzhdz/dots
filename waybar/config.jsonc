@@ -109,7 +109,7 @@
   },
   "custom/arch": {
     "format": "󰣇",
-    "on-click": "/home/muadzhdz/.config/scripts/launcher.sh",
+    "on-click": "$XDG_CONFIG_HOME/scripts/launcher.sh",
     "tooltip": false
   },
   "custom/voxtype": {

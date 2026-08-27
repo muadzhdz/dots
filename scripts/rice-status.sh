@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Rice ISO build monitor
 # Usage: rice-status.sh [status|tail|phase|log|help]
 

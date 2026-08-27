@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 cleanup_freeze() {
   [[ -n $PID ]] && kill $PID 2>/dev/null

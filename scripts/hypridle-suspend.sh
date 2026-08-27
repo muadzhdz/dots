@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # hypridle-suspend.sh
 # Dipanggil hypridle saat timeout suspend. Skip suspend jika ada proses penting
 # yang sedang berjalan (video/musik, download, CLI agent). Lock & screen off
