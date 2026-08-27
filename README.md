@@ -2,13 +2,14 @@
 
 Personal Hyprland dotfiles — monochrome dark theme, no matugen.
 
-<!-- Add screenshot here: ![preview](screenshot.png) -->
+![preview](preview.gif)
 
 ## Install
 
 ```bash
 git clone https://github.com/muadzhdz/dots && cd dots
-./install.sh
+./install.sh          # full install
+./install.sh --check  # dry-run (preview only, no changes)
 ```
 
 Requires Arch Linux with sudo. Installs everything: packages, AUR helpers (paru + yay), configs, PostgreSQL, MariaDB, UFW, plocate, nix, voxtype, fetch.

@@ -4,8 +4,12 @@ set -euo pipefail
 # ---------------------------------------------------------------
 #  dots installer — Hyprland rice, monochrome dark theme
 #  Requires: Arch Linux (or derivative) with sudo
-#  Usage:    ./install.sh
+#  Usage:    ./install.sh [--check]
+#  --check   Dry-run: show what would be done without making changes
 # ---------------------------------------------------------------
+
+DRY_RUN=0
+[[ "${1:-}" == "--check" ]] && DRY_RUN=1
 
 RED='\033[0;31m'
 GRN='\033[0;32m'
@@ -23,6 +27,23 @@ DEST="${XDG_CONFIG_HOME:-$HOME/.config}"
 FAILED=()
 step_ok() { log "  ✓ $1"; }
 step_fail() { warn "  ✗ $1"; FAILED+=("$1"); }
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+    log "=== DRY RUN MODE — no changes will be made ==="
+    log ""
+    log "This installer would:"
+    log "  1. Install official packages: ${OFFICIAL_PKGS[*]:-hyprland waybar mako ...}"
+    log "  2. Install AUR packages: sddm-silent-theme ttf-material-symbols ..."
+    log "  3. Copy configs to $DEST"
+    log "  4. Enable user services: swayosd-server, voxtype"
+    log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
+    log "  6. Setup SDDM, PostgreSQL, MariaDB, UFW, plocate"
+    log "  7. Build + install fetch from source"
+    log "  8. Configure nix (sandbox=false for DNS)"
+    log ""
+    log "Run without --check to execute."
+    exit 0
+fi
 
 # ---------------------------------------------------------------
 #  1. Environment checks
@@ -137,6 +158,20 @@ for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct 
         cp -r "$DEST/$item" "$BACKUP_DIR/" 2>/dev/null || true
     fi
 done
+
+# rollback trap: restore from backup if script fails critically
+rollback() {
+    if [[ -d "$BACKUP_DIR" ]]; then
+        warn "Install failed — restoring configs from $BACKUP_DIR"
+        for item in "$BACKUP_DIR"/*; do
+            name=$(basename "$item")
+            rm -rf "$DEST/$name" 2>/dev/null || true
+            cp -r "$item" "$DEST/$name" 2>/dev/null || true
+        done
+        log "Configs restored. Check $BACKUP_DIR for details."
+    fi
+}
+trap rollback ERR
 
 copy_to() { # $1=src  $2=dst
     echo "  -> $2"

@@ -98,7 +98,7 @@ elif [[ "$action" == *"Remove"* ]]; then
         list+="󰩹  $name | $(basename "$file")\n"
     done <<< "$installed_apps"
 
-    selected=$(echo -e "$list" | $ROFI_CMD "Select Web App:")
+    selected=$(printf "%b" "$list" | $ROFI_CMD "Select Web App:")
     [[ -z "$selected" ]] && exit 0
 
     file_to_remove="${selected##*| }"
