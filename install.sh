@@ -11,11 +11,11 @@ set -euo pipefail
 DRY_RUN=0
 [[ "${1:-}" == "--check" ]] && DRY_RUN=1
 
-RED='\033[0;31m'
-GRN='\033[0;32m'
-YLW='\033[1;33m'
-CYN='\033[0;36m'
-RST='\033[0m'
+RED=$'\e[0;31m'
+GRN=$'\e[0;32m'
+YLW=$'\e[1;33m'
+CYN=$'\e[0;36m'
+RST=$'\e[0m'
 
 log()  { printf "${GRN}[dots]${RST} %s\n" "$*"; }
 warn() { printf "${YLW}[dots]${RST} %s\n" "$*"; }
@@ -167,6 +167,9 @@ fi
 # Installed separately since it's a multi-provider AUR package
 # (prompt would block --noconfirm in the combined install).
 AUR_PKGS_INTERACTIVE=("$VOXTYPE_PKG")
+# voxtype/voxtype-bin/voxtype-cuda all provide /usr/bin/voxtype — remove
+# any previously installed variant so --noconfirm doesn't hit a conflict.
+sudo pacman -R --noconfirm voxtype voxtype-bin voxtype-cuda 2>/dev/null || true
 log "  -> voxtype ($VOXTYPE_PKG)"
 if [[ ${#AUR_PKGS_INTERACTIVE[@]} -gt 0 ]]; then
     if $AUR_HELPER -S --needed --noconfirm "${AUR_PKGS_INTERACTIVE[@]}"; then
@@ -279,9 +282,12 @@ if command -v voxtype >/dev/null 2>&1; then
         warn "  added $USER to the 'input' group — re-login for evdev hotkeys"
     fi
     sudo voxtype setup gpu --enable 2>/dev/null || true
-    # download Whisper small (multilingual: Indonesian + English) + VAD model
-    voxtype setup --download --model small --quiet 2>/dev/null || \
-        warn "  model download failed (run: voxtype setup --download --model small)"
+    # note: --download WITHOUT --model downloads the Whisper model from
+    # config.toml ([whisper] model). Passing --model here resolves against
+    # all engines (e.g. 'small' also matches SenseVoice) — voxtype-bin is
+    # built without the sensevoice feature, so keep it at plain --download.
+    voxtype setup --download --quiet 2>/dev/null || \
+        warn "  model download failed (run: voxtype setup --download)"
     voxtype setup vad 2>/dev/null || true
     step_ok "voxtype (gpu + models)"
 else
@@ -380,9 +386,9 @@ fi
 #  10. MariaDB — create user role matching login user
 # ---------------------------------------------------------------
 log "  -> MariaDB"
-# init data directory first if missing
+# init data directory first if missing (guarded re-runs; silence output)
 if [[ ! -d /var/lib/mysql/mysql ]]; then
-    sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql 2>/dev/null || true
+    sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql >/dev/null 2>&1 || true
 fi
 if sudo systemctl enable --now mariadb 2>/dev/null; then
     if ! sudo mariadb -e "SELECT User FROM mysql.user WHERE User='$USER'" 2>/dev/null | grep -q "$USER"; then
@@ -509,17 +515,17 @@ fi
 printf "\n"
 cat <<EOF
 Next steps:
-  1. Reload the shell (${CYN}source ~/.bashrc${RST})
+  1. Reload the shell (source ~/.bashrc)
   2. Log out, log in from SDDM
-  3. Use ${CYN}SUPER+W${RST} (random) / ${CYN}SUPER+SHIFT+W${RST} (picker) for wallpapers
+  3. Use SUPER+W (random) / SUPER+SHIFT+W (picker) for wallpapers
 
 Quick commands:
-  ${CYN}fetch${RST}             — 3D spinning logo
-  ${CYN}nix develop${RST}       — dev shell (type 'exit' to leave)
-  ${CYN}locate <name>${RST}     — find files
-  ${CYN}sudo ufw status${RST}   — check firewall
-  ${CYN}psql${RST}              — PostgreSQL
-  ${CYN}mariadb${RST}           — MariaDB
+  fetch             — 3D spinning logo
+  nix develop       — dev shell (type 'exit' to leave)
+  locate <name>     — find files
+  sudo ufw status   — check firewall
+  psql              — PostgreSQL
+  mariadb           — MariaDB
 
 Notes:
   * Requires Hyprland >= 0.55
