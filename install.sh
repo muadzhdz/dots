@@ -33,7 +33,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log ""
     log "This installer would:"
     log "  1. Install official packages: ${OFFICIAL_PKGS[*]:-hyprland waybar mako ...}"
-    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + supabase-bin + vercel + voxtype (GPU-matched) + laravel installer"
+    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + supabase-bin + vercel + voxtype (GPU-matched) + laravel installer + agent CLIs (paru: kiro-cli, opencode-bin, antigravity-cli)"
     log "  3. Copy configs to $DEST"
     log "  4. Enable user services: swayosd-server, voxtype (gpu + whisper-small model)"
     log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
@@ -174,6 +174,15 @@ if command -v composer >/dev/null 2>&1; then
     else
         step_fail "laravel installer"
     fi
+fi
+
+# Agent CLIs — installed via paru (user requested paru specifically).
+# antigravity-cli = Google's agentic dev platform (provides 'agy').
+log "  -> agent CLIs (paru): kiro-cli opencode-bin antigravity-cli"
+if paru -S --needed --noconfirm kiro-cli opencode-bin antigravity-cli; then
+    step_ok "agent CLIs (paru)"
+else
+    step_fail "agent CLIs (paru)"
 fi
 
 # ---------------------------------------------------------------
