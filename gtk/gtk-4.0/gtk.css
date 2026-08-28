@@ -72,28 +72,3 @@ treeview:selected {
     background-color: #222222 !important;
     color: #ffffff !important;
 }
-/* Context menus / popovers (GTK4) — solid background, no transparency. */
-popover,
-popover > contents,
-popover.menu,
-popover.menu > contents {
-    background-color: #000000;
-    background-image: none;
-    border: 1px solid #222222;
-    box-shadow: none;
-}
-
-popover.menu box > button {
-    background-color: #000000;
-    color: #ffffff;
-    border-radius: 0;
-}
-
-popover.menu box > button:hover {
-    background-color: #333333;
-    color: #ffffff;
-}
-
-popover separator {
-    background-color: #222222;
-}
