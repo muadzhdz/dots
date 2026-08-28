@@ -36,10 +36,12 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + supabase-bin + vercel + voxtype (GPU-matched) + laravel installer + agent CLIs (paru: kiro-cli, opencode-bin, antigravity-cli)"
     log "  3. Copy configs to $DEST"
     log "  4. Enable user services: swayosd-server, voxtype (gpu + whisper-small model)"
-    log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
+    log "  5. Enable system services: networkd, resolved, iwd, bluetooth, tailscaled, libvirtd"
     log "  6. Setup SDDM, PostgreSQL, MariaDB, UFW, plocate"
     log "  7. Build + install fetch from source"
     log "  8. Configure nix (sandbox=false for DNS)"
+    log "  9. Install 9 web apps (ChatGPT, Gemini, Instagram, WhatsApp, Figma, Canva,"
+    log "     Github, Edlink, Youtube) as Chromium standalone windows"
     log ""
     log "Run without --check to execute."
     exit 0
@@ -89,6 +91,7 @@ OFFICIAL_PKGS=(
     ufw
     nodejs npm rust go make cmake gcc jdk-openjdk maven php composer
     tailscale
+    gnome-boxes virt-manager libvirt kdenlive libreoffice-fresh scrcpy
 )
 
 AUR_PKGS=(
@@ -96,6 +99,9 @@ AUR_PKGS=(
     redhat-fonts
     supabase-bin
     vercel
+    onlyoffice-bin
+    1password
+    android-sdk-platform-tools
 )
 
 # ---------------------------------------------------------------
@@ -397,6 +403,11 @@ sudo systemctl enable --now systemd-resolved 2>/dev/null || true
 sudo systemctl enable --now iwd 2>/dev/null || true
 sudo systemctl enable --now bluetooth 2>/dev/null || true
 sudo systemctl enable --now tailscaled 2>/dev/null || true
+sudo systemctl enable --now libvirtd 2>/dev/null || true
+if ! id -nG | tr ' ' '\n' | grep -qx libvirt; then
+    sudo usermod -aG libvirt "$USER"
+    warn "  added $USER to the 'libvirt' group — re-login to use virt-manager without sudo"
+fi
 sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
 step_ok "system services"
 
@@ -553,12 +564,66 @@ if [[ -x "$DEST/scripts/sddm-sync.sh" ]]; then
 fi
 step_ok "bashrc + directories + wallpaper"
 
+# --- Web apps: native-like standalone Chromium windows (same layout as
+# webapp-installer.sh, run non-interactively so they exist right after
+# install). App launcher (rofi) picks these up via ~/.local/share/applications.
+WEBAPP_ICON_DIR="$HOME/.local/share/icons"
+WEBAPP_DESKTOP_DIR="$HOME/.local/share/applications"
+mkdir -p "$WEBAPP_ICON_DIR" "$WEBAPP_DESKTOP_DIR"
+
+install_webapp() { # $1=name  $2=url
+    local name="$1" url="$2"
+    local safe_name icon_path desktop_file domain
+    safe_name=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9_-')
+    domain=$(echo "$url" | awk -F/ '{print $3}')
+    icon_path="$WEBAPP_ICON_DIR/webapp-$safe_name.png"
+    desktop_file="$WEBAPP_DESKTOP_DIR/webapp-$safe_name.desktop"
+    if [[ -f "$desktop_file" ]]; then
+        log "  -> $name (already installed)"
+        return
+    fi
+    curl -sL "https://www.google.com/s2/favicons?domain=${domain}&sz=256" -o "$icon_path" || true
+    [[ -s "$icon_path" ]] || icon_path="web-browser"
+    cat << EOF > "$desktop_file"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$name
+Comment=Web Application for $name
+Exec=chromium --app=$url --name=$safe_name --class=webapp-$safe_name
+Icon=$icon_path
+Terminal=false
+StartupNotify=true
+Categories=Network;WebApplication;
+StartupWMClass=webapp-$safe_name
+EOF
+    chmod +x "$desktop_file"
+    log "  -> $name ($url)"
+}
+
+WEBAPPS=(
+    "ChatGPT:https://chatgpt.com"
+    "Gemini:https://gemini.google.com"
+    "Instagram:https://instagram.com"
+    "WhatsApp:https://web.whatsapp.com"
+    "Figma:https://figma.com"
+    "Canva:https://canva.com"
+    "Github:https://github.com"
+    "Edlink:https://edlink.id"
+    "Youtube:https://youtube.com"
+)
+for w in "${WEBAPPS[@]}"; do
+    install_webapp "${w%%:*}" "${w#*:}"
+done
+command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$WEBAPP_DESKTOP_DIR" 2>/dev/null || true
+step_ok "web apps (${#WEBAPPS[@]})"
+
 # ---------------------------------------------------------------
 #  14. Verify critical services
 # ---------------------------------------------------------------
 log "Verifying critical services..."
 SVC_OK=0; SVC_FAIL=0
-for svc in systemd-networkd systemd-resolved iwd bluetooth tailscaled; do
+for svc in systemd-networkd systemd-resolved iwd bluetooth tailscaled libvirtd; do
     if systemctl is-active --quiet "$svc" 2>/dev/null; then
         SVC_OK=$((SVC_OK + 1))
     else
@@ -616,4 +681,6 @@ Notes:
   * SDDM mirrors your wallpaper automatically
   * Both paru and yay installed
   * voxtype daemon runs on login (push-to-talk dictation)
+  * Web apps: ChatGPT, Gemini, Instagram, WhatsApp, Figma, Canva, Github,
+    Edlink, Youtube (Chromium standalone windows in app launcher)
 EOF
