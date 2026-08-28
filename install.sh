@@ -33,9 +33,9 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log ""
     log "This installer would:"
     log "  1. Install official packages: ${OFFICIAL_PKGS[*]:-hyprland waybar mako ...}"
-    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts"
+    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + voxtype-bin"
     log "  3. Copy configs to $DEST"
-    log "  4. Enable user services: swayosd-server"
+    log "  4. Enable user services: swayosd-server, voxtype (gpu + whisper-small model)"
     log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
     log "  6. Setup SDDM, PostgreSQL, MariaDB, UFW, plocate"
     log "  7. Build + install fetch from source"
@@ -140,13 +140,26 @@ if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
     fi
 fi
 
+# voxtype: use voxtype-bin (precompiled — the source pkg ships the whole
+# test suite and takes very long to build). voxtype/voxtype-bin/voxtype-cuda
+# all provide /usr/bin/voxtype, so remove any prior variant to keep
+# --noconfirm conflict-free. GPU handled later via 'setup gpu --enable'
+# (auto-detects Vulkan on AMD/Intel/NVIDIA).
+sudo pacman -R --noconfirm voxtype voxtype-bin voxtype-cuda 2>/dev/null || true
+log "  -> voxtype (voxtype-bin)"
+if $AUR_HELPER -S --needed --noconfirm voxtype-bin; then
+    step_ok "voxtype (voxtype-bin)"
+else
+    step_fail "voxtype (voxtype-bin)"
+fi
+
 # ---------------------------------------------------------------
 #  5. Copy configs with safe auto-backup
 # ---------------------------------------------------------------
 BACKUP_DIR="$HOME/.config.backup-$(date +%Y%m%d_%H%M%S)"
 log "[3/6] Creating safety backup in $BACKUP_DIR and copying configs to $DEST"
 mkdir -p "$BACKUP_DIR"
-for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim Kvantum themes; do
+for item in hypr scripts waybar rofi mako kitty swayosd btop cava ghostty qt6ct gtk-3.0 gtk-4.0 obs-studio nvim voxtype Kvantum themes; do
     if [[ -d "$DEST/$item" ]]; then
         cp -r "$DEST/$item" "$BACKUP_DIR/" 2>/dev/null || true
     fi
@@ -187,6 +200,7 @@ copy_to gtk/gtk-3.0    gtk-3.0
 copy_to gtk/gtk-4.0    gtk-4.0
 copy_to obs-studio     obs-studio
 copy_to nvim           nvim
+copy_to voxtype        voxtype
 copy_to Kvantum        Kvantum
 copy_to themes         themes
 copy_to nix            nix
@@ -276,6 +290,54 @@ if systemctl --user enable --now swayosd-server.service 2>/dev/null; then
     step_ok "swayosd-server"
 else
     step_fail "swayosd-server"
+fi
+
+# voxtype: preflight (input group, GPU, Whisper model, VAD) BEFORE starting
+# the daemon so it comes up fully working on first login.
+if command -v voxtype >/dev/null 2>&1; then
+    log "  -> voxtype setup (input group, GPU, model)"
+    if ! id -nG | tr ' ' '\n' | grep -qx input; then
+        sudo usermod -aG input "$USER" 2>/dev/null || true
+        warn "  added $USER to the 'input' group — re-login for evdev hotkeys"
+    fi
+    # Auto-detect GPU backend (Vulkan on AMD/Intel/NVIDIA)
+    sudo voxtype setup gpu --enable 2>/dev/null || true
+    # Whisper model with visible progress. NEVER pass --model here: in
+    # voxtype 0.7.5 'small' also matches SenseVoice and voxtype-bin is
+    # built without that feature. Plain --download pulls from config.toml
+    # ([whisper] model = "small").
+    MODEL_DIR="$HOME/.local/share/voxtype/models"
+    MODEL_FILE="ggml-small.bin"
+    mkdir -p "$MODEL_DIR"
+    if [[ ! -f "$MODEL_DIR/$MODEL_FILE" ]]; then
+        log "  -> downloading Whisper $MODEL_FILE (465 MB) from HuggingFace..."
+        if curl -fL --retry 3 --progress-bar \
+            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$MODEL_FILE" \
+            -o "$MODEL_DIR/$MODEL_FILE.part"; then
+            mv "$MODEL_DIR/$MODEL_FILE.part" "$MODEL_DIR/$MODEL_FILE"
+            step_ok "whisper model ($MODEL_FILE)"
+        else
+            rm -f "$MODEL_DIR/$MODEL_FILE.part"
+            warn "  direct download failed — trying voxtype"
+            if voxtype setup --download 2>/dev/null; then
+                step_ok "whisper model (via voxtype)"
+            else
+                warn "  model download failed (run: voxtype setup --download manually)"
+            fi
+        fi
+    else
+        log "  -> Whisper model already present ($MODEL_FILE)"
+    fi
+    voxtype setup vad 2>/dev/null || true
+    step_ok "voxtype (gpu + models)"
+else
+    warn "  voxtype binary not found"
+fi
+
+if systemctl --user enable --now voxtype.service 2>/dev/null; then
+    step_ok "voxtype"
+else
+    step_fail "voxtype"
 fi
 
 # swayosd needs write access to /sys/class/backlight/*/brightness,
@@ -471,7 +533,7 @@ for svc in systemd-networkd systemd-resolved iwd bluetooth; do
         SVC_FAIL=$((SVC_FAIL + 1))
     fi
 done
-for svc in swayosd-server; do
+for svc in swayosd-server voxtype; do
     if systemctl --user is-active --quiet "$svc" 2>/dev/null; then
         SVC_OK=$((SVC_OK + 1))
     else
@@ -520,4 +582,5 @@ Notes:
   * Requires Hyprland >= 0.55
   * SDDM mirrors your wallpaper automatically
   * Both paru and yay installed
+  * voxtype daemon runs on login (push-to-talk dictation)
 EOF
