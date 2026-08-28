@@ -33,7 +33,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log ""
     log "This installer would:"
     log "  1. Install official packages: ${OFFICIAL_PKGS[*]:-hyprland waybar mako ...}"
-    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + voxtype-bin"
+    log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + supabase-bin + vercel + voxtype (GPU-matched) + laravel installer"
     log "  3. Copy configs to $DEST"
     log "  4. Enable user services: swayosd-server, voxtype (gpu + whisper-small model)"
     log "  5. Enable system services: networkd, resolved, iwd, bluetooth"
@@ -87,11 +87,15 @@ OFFICIAL_PKGS=(
     plocate
     postgresql mariadb
     ufw
+    nodejs npm rust go make cmake gcc jdk-openjdk maven php composer
+    tailscale
 )
 
 AUR_PKGS=(
     sddm-silent-theme
     redhat-fonts
+    supabase-bin
+    vercel
 )
 
 # ---------------------------------------------------------------
@@ -140,17 +144,36 @@ if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
     fi
 fi
 
-# voxtype: use voxtype-bin (precompiled — the source pkg ships the whole
-# test suite and takes very long to build). voxtype/voxtype-bin/voxtype-cuda
-# all provide /usr/bin/voxtype, so remove any prior variant to keep
-# --noconfirm conflict-free. GPU handled later via 'setup gpu --enable'
-# (auto-detects Vulkan on AMD/Intel/NVIDIA).
+# voxtype: prepackaged binaries. voxtype/voxtype-bin/voxtype-cuda all own
+# /usr/bin/voxtype, so drop any prior variant to keep --noconfirm clean.
+# GPU detection picks the right build: NVIDIA -> voxtype-cuda (Whisper via
+# CUDA), AMD/Intel -> voxtype-bin (Whisper via Vulkan). The Whisper model
+# itself (ggml-small.bin, downloaded from HuggingFace later) is identical
+# for every backend.
 sudo pacman -R --noconfirm voxtype voxtype-bin voxtype-cuda 2>/dev/null || true
-log "  -> voxtype (voxtype-bin)"
-if $AUR_HELPER -S --needed --noconfirm voxtype-bin; then
-    step_ok "voxtype (voxtype-bin)"
+VOXTYPE_PKG="voxtype-bin"
+if lspci 2>/dev/null | grep -qi nvidia; then
+    log "  NVIDIA GPU detected — voxtype-cuda (Whisper via CUDA)"
+    VOXTYPE_PKG="voxtype-cuda"
+elif lspci 2>/dev/null | grep -qi 'amd\|radeon\|ati\|intel'; then
+    log "  AMD/Intel GPU detected — voxtype-bin (Whisper via Vulkan)"
 else
-    step_fail "voxtype (voxtype-bin)"
+    log "  No dedicated GPU found — voxtype-bin (CPU + Vulkan)"
+fi
+if $AUR_HELPER -S --needed --noconfirm "$VOXTYPE_PKG"; then
+    step_ok "voxtype ($VOXTYPE_PKG)"
+else
+    step_fail "voxtype ($VOXTYPE_PKG)"
+fi
+
+# Laravel installer via composer (global, lands in ~/.config/composer/vendor/bin)
+if command -v composer >/dev/null 2>&1; then
+    log "  -> laravel installer (composer global)"
+    if composer global require laravel/installer --no-interaction 2>/dev/null; then
+        step_ok "laravel installer"
+    else
+        step_fail "laravel installer"
+    fi
 fi
 
 # ---------------------------------------------------------------
@@ -364,6 +387,7 @@ sudo systemctl enable --now systemd-networkd 2>/dev/null || true
 sudo systemctl enable --now systemd-resolved 2>/dev/null || true
 sudo systemctl enable --now iwd 2>/dev/null || true
 sudo systemctl enable --now bluetooth 2>/dev/null || true
+sudo systemctl enable --now tailscaled 2>/dev/null || true
 sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
 step_ok "system services"
 
@@ -525,7 +549,7 @@ step_ok "bashrc + directories + wallpaper"
 # ---------------------------------------------------------------
 log "Verifying critical services..."
 SVC_OK=0; SVC_FAIL=0
-for svc in systemd-networkd systemd-resolved iwd bluetooth; do
+for svc in systemd-networkd systemd-resolved iwd bluetooth tailscaled; do
     if systemctl is-active --quiet "$svc" 2>/dev/null; then
         SVC_OK=$((SVC_OK + 1))
     else
