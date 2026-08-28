@@ -36,7 +36,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + supabase-bin + vercel + voxtype (GPU-matched) + laravel installer + agent CLIs (paru: kiro-cli, opencode-bin, antigravity-cli)"
     log "  3. Copy configs to $DEST"
     log "  4. Enable user services: swayosd-server, voxtype (gpu + whisper-small model)"
-    log "  5. Enable system services: networkd, resolved, iwd, bluetooth, tailscaled, libvirt (virtqemud + NAT net)"
+    log "  5. Enable system services: networkd, resolved, iwd, bluetooth, tailscaled, libvirt (virtqemud + NAT net), httpd"
     log "  6. Setup SDDM, PostgreSQL, MariaDB, UFW, plocate"
     log "  7. Build + install fetch from source"
     log "  8. Configure nix (sandbox=false for DNS)"
@@ -91,6 +91,7 @@ OFFICIAL_PKGS=(
     ufw
     nodejs npm rust go make cmake gcc jdk-openjdk maven php composer
     tailscale
+    apache
     gnome-boxes virt-manager libvirt qemu-desktop edk2-ovmf dnsmasq kdenlive libreoffice-fresh scrcpy sof-firmware
 )
 
@@ -416,6 +417,8 @@ if ! id -nG | tr ' ' '\n' | grep -qx libvirt; then
     sudo usermod -aG libvirt "$USER"
     warn "  added $USER to the 'libvirt' group — re-login to use virt-manager without sudo"
 fi
+# Apache web server (httpd) — serves /srv/http by default
+sudo systemctl enable --now httpd 2>/dev/null || true
 sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
 step_ok "system services"
 
@@ -631,7 +634,7 @@ step_ok "web apps (${#WEBAPPS[@]})"
 # ---------------------------------------------------------------
 log "Verifying critical services..."
 SVC_OK=0; SVC_FAIL=0
-for svc in systemd-networkd systemd-resolved iwd bluetooth tailscaled virtqemud.socket; do
+for svc in systemd-networkd systemd-resolved iwd bluetooth tailscaled virtqemud.socket httpd; do
     if systemctl is-active --quiet "$svc" 2>/dev/null; then
         SVC_OK=$((SVC_OK + 1))
     else
