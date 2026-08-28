@@ -72,3 +72,35 @@ treeview:selected {
     background-color: #222222 !important;
     color: #ffffff !important;
 }
+/* Context menus (GtkMenu) — e.g. Waybar tray right-click menu (1Password,
+   OBS Studio, etc.). Solid background, no transparency. */
+menu,
+.menu {
+    background-color: #000000;
+    background-image: none;
+    border: 1px solid #222222;
+    box-shadow: none;
+}
+
+menu menuitem,
+.menu menuitem {
+    background-color: #000000;
+    background-image: none;
+    color: #ffffff;
+    padding: 6px 12px;
+}
+
+menu menuitem:hover,
+.menu menuitem:hover label {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+menu menuitem:disabled,
+.menu menuitem:disabled label {
+    color: #555555;
+}
+
+menu separator {
+    background-color: #222222;
+}
