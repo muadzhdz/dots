@@ -629,16 +629,6 @@ done
 command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$WEBAPP_DESKTOP_DIR" 2>/dev/null || true
 step_ok "web apps (${#WEBAPPS[@]})"
 
-# Hide avahi's junk launcher entries ("avahi ssh", "avahi vnc", "avahi
-# discover") that clutter rofi drun. User-level .desktop overrides with
-# Hidden=true shadow the system ones (survives package updates).
-for f in bssh.desktop bvnc.desktop avahi-discover.desktop; do
-    if [[ -f /usr/share/applications/$f ]]; then
-        printf '[Desktop Entry]\nType=Application\nHidden=true\n' > "$WEBAPP_DESKTOP_DIR/$f"
-    fi
-done
-step_ok "hidden avahi launcher entries"
-
 # ---------------------------------------------------------------
 #  14. Verify critical services
 # ---------------------------------------------------------------
