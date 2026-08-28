@@ -8,6 +8,10 @@ enabled = false
 model = "small"
 language = "auto"
 
+# Capture via PipeWire node streams (NOT raw ALSA hw: — that would lock the
+# mic exclusively and break OBS / system audio). PipeWire is multi-client:
+# voxtype, OBS and the desktop all read the mic simultaneously. Needs SOF
+# firmware (sof-firmware) so the internal DMIC exists on AMD laptops.
 [audio]
 device = "pipewire"
 sample_rate = 16000

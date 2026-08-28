@@ -36,7 +36,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log "  2. Install AUR packages: sddm-silent-theme + redhat-fonts + supabase-bin + vercel + voxtype (GPU-matched) + laravel installer + agent CLIs (paru: kiro-cli, opencode-bin, antigravity-cli)"
     log "  3. Copy configs to $DEST"
     log "  4. Enable user services: swayosd-server, voxtype (gpu + whisper-small model)"
-    log "  5. Enable system services: networkd, resolved, iwd, bluetooth, tailscaled, libvirtd"
+    log "  5. Enable system services: networkd, resolved, iwd, bluetooth, tailscaled, libvirt (virtqemud + NAT net)"
     log "  6. Setup SDDM, PostgreSQL, MariaDB, UFW, plocate"
     log "  7. Build + install fetch from source"
     log "  8. Configure nix (sandbox=false for DNS)"
@@ -91,7 +91,7 @@ OFFICIAL_PKGS=(
     ufw
     nodejs npm rust go make cmake gcc jdk-openjdk maven php composer
     tailscale
-    gnome-boxes virt-manager libvirt kdenlive libreoffice-fresh scrcpy
+    gnome-boxes virt-manager libvirt qemu-desktop edk2-ovmf dnsmasq kdenlive libreoffice-fresh scrcpy sof-firmware
 )
 
 AUR_PKGS=(
@@ -403,7 +403,15 @@ sudo systemctl enable --now systemd-resolved 2>/dev/null || true
 sudo systemctl enable --now iwd 2>/dev/null || true
 sudo systemctl enable --now bluetooth 2>/dev/null || true
 sudo systemctl enable --now tailscaled 2>/dev/null || true
-sudo systemctl enable --now libvirtd 2>/dev/null || true
+# libvirt modular daemons. virt-manager's qemu:///system URI talks to
+# virtqemud — if only the old monolithic libvirtd is (or isn't) enabled,
+# /var/run/libvirt/virtqemud-sock never appears and virt-manager errors
+# "Failed to connect socket to '/var/run/libvirt/virtqemud-sock'".
+sudo systemctl enable --now virtqemud.socket virtlogd.socket virtlockd.socket 2>/dev/null || true
+sudo systemctl disable --now libvirtd.service 2>/dev/null || true
+# Bring up the default NAT network (virbr0, 192.168.122.0/24, needs dnsmasq)
+sudo virsh net-start default 2>/dev/null || true
+sudo virsh net-autostart default 2>/dev/null || true
 if ! id -nG | tr ' ' '\n' | grep -qx libvirt; then
     sudo usermod -aG libvirt "$USER"
     warn "  added $USER to the 'libvirt' group — re-login to use virt-manager without sudo"
@@ -623,7 +631,7 @@ step_ok "web apps (${#WEBAPPS[@]})"
 # ---------------------------------------------------------------
 log "Verifying critical services..."
 SVC_OK=0; SVC_FAIL=0
-for svc in systemd-networkd systemd-resolved iwd bluetooth tailscaled libvirtd; do
+for svc in systemd-networkd systemd-resolved iwd bluetooth tailscaled virtqemud.socket; do
     if systemctl is-active --quiet "$svc" 2>/dev/null; then
         SVC_OK=$((SVC_OK + 1))
     else
