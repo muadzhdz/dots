@@ -28,11 +28,12 @@ function _osc7 {
 PROMPT_COMMAND="_osc7${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
 _nix_dev_icon=$'\uf313'
+_py_venv_icon=$'\ue73c'
 _git_icon=$'\ue0a0'
 _file_icon=$'\uf15b'
 _folder_icon=$'\uf07b'
 _update_prompt() {
-    local _NIX_PRE="" _GIT_PRE=""
+    local _NIX_PRE="" _VENV_PRE="" _GIT_PRE=""
 
     if [[ -n ${IN_NIX_SHELL:-} ]]; then
         if [[ -z ${_NIX_DEV_LABEL:-} ]]; then
@@ -53,6 +54,11 @@ _update_prompt() {
             fi
         fi
         _NIX_PRE="\[\e[1m\]( ${_nix_dev_icon} ${_NIX_DEV_LABEL} )\[\e[0m\] "
+    fi
+
+    if [[ -n ${VIRTUAL_ENV:-} ]]; then
+        local venv_name="${VIRTUAL_ENV##*/}"
+        _VENV_PRE="\[\e[1m\]( ${_py_venv_icon} ${venv_name} )\[\e[0m\] "
     fi
 
     local st br file_count dir_count dirty_count line path
@@ -87,7 +93,7 @@ _update_prompt() {
         fi
     fi
 
-    PS1="${_NIX_PRE}${_GIT_PRE}${_PS1_BASE}"
+    PS1="${_NIX_PRE}${_VENV_PRE}${_GIT_PRE}${_PS1_BASE}"
 }
 PROMPT_COMMAND="_update_prompt${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
